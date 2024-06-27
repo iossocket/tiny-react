@@ -1,4 +1,4 @@
-import { peak, pop, push } from "../SchedulerMinHeap";
+import { peak, pop, push } from "./SchedulerMinHeap";
 import { lowPriorityTimeout, maxSigned31BitInt, normalPriorityTimeout, userBlockingPriorityTimeout } from "./SchedulerFeatureFlags";
 import {
   PriorityLevel,
@@ -30,11 +30,11 @@ let taskIdCounter = 1;
 let startTime = -1;
 let frameInterval = 5;
 
-// 是否有 work 在执行
+// to check any work is running
 let isPerformingWork = false;
-// 主线程是否在调度
+// to check whether main thread is scheduling
 let isHostCallbackScheduled = false;
-// 有没有异步任务在运行
+// to check any async task is running
 let isMessageLoopRunning = false;
 
 function scheduleCallback(priorityLevel: PriorityLevel, callback: Callback) {
