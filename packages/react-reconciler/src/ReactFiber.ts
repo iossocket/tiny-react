@@ -1,0 +1,33 @@
+import { WorkTag } from "./ReactWorkTags";
+
+export type Fiber = {
+  // describe component type, native tag / functional component / class component
+  tag: WorkTag;
+
+  key: null | string;
+
+  elementType: any;
+
+  type: any;
+
+  stateNode: any;
+
+  return: Fiber | null;
+
+  child: Fiber | null;
+
+  sibling: Fiber | null;
+
+  index: number;
+
+  // new props
+  pendingProps: any;
+  // used for last rendering
+  memoizedProps: any;
+
+  memoizedState: any;
+
+  flags: Flags;
+
+  alternative: Fiber | null;
+}
