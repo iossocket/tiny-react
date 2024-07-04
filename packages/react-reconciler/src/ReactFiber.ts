@@ -10,11 +10,11 @@ import {
 } from "shared/ReactSymbols";
 import { isFn, isStr } from "shared/utils";
 
-export const createFiber = (
+export function createFiber(
   tag: WorkTag,
   pendingProps: any,
   key: null | string
-): Fiber => {
+): Fiber {
   return new FiberNode(tag, pendingProps, key);
 };
 
@@ -42,18 +42,18 @@ function FiberNode(tag: WorkTag, pendingProps: any, key: null | string) {
   this.alternate = null;
 }
 
-export const createFiberFromElement = (element: ReactElement) => {
+export function createFiberFromElement(element: ReactElement) {
   const { type, key } = element;
   const pendingProps = element.props;
   const fiber = createFiberFromTypeAndProps(type, key, pendingProps);
   return fiber;
 }
 
-export const createFiberFromTypeAndProps = (
+export function createFiberFromTypeAndProps(
   type: any,
   key: null | string,
   pendingProps: any
-) => {
+) {
   let fiberTag: WorkTag = IndeterminateComponent;
 
   if (isFn(type)) {
@@ -80,4 +80,27 @@ export const createFiberFromTypeAndProps = (
   fiber.elementType = type;
   fiber.type = type;
   return fiber;
+}
+
+export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
+  let workInProgress = current.alternate;
+  if (workInProgress === null) {
+    workInProgress = createFiber(current.tag, pendingProps, current.key);
+    workInProgress.elementType = current.elementType;
+    workInProgress.type = current.type;
+    workInProgress.stateNode = current.stateNode;
+    workInProgress.alternate = current;
+    current.alternate = workInProgress;
+  } else {
+    workInProgress.pendingProps = pendingProps;
+    workInProgress.type = current.type;
+    workInProgress.flags = NoFlags;
+  }
+  workInProgress.flags = current.flags;
+  workInProgress.child = current.child;
+  workInProgress.memoizedProps = current.memoizedProps;
+  workInProgress.memoizedState = current.memoizedState;
+  workInProgress.sibling = current.sibling;
+  workInProgress.index = current.index;
+  return workInProgress;
 }

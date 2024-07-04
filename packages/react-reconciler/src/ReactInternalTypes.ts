@@ -30,7 +30,7 @@ export type Fiber = {
 
   flags: Flags;
 
-  alternative: Fiber | null;
+  alternate: Fiber | null;
 }
 
 export type Container = Element | Document | DocumentFragment;

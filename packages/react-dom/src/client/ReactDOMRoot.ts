@@ -16,7 +16,7 @@ ReactDOMRoot.prototype.render = function (children: ReactNodeList) {
   updateContainer(children, this._internalRoot);
 }
 
-export const createRoot = (container: Container): RootType => {
+export function createRoot(container: Container): RootType {
   const root: FiberRoot = createFiberRoot(container);
   return new ReactDOMRoot(root);
 };

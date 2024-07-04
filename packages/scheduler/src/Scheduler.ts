@@ -37,7 +37,7 @@ let isHostCallbackScheduled = false;
 // to check any async task is running
 let isMessageLoopRunning = false;
 
-function scheduleCallback(priorityLevel: PriorityLevel, callback: Callback) {
+export function scheduleCallback(priorityLevel: PriorityLevel, callback: Callback) {
   const startTime = getCurrentTime();
   let timeout: number;
   switch (priorityLevel) {

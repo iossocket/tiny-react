@@ -6,5 +6,7 @@ export function updateContainer(element: ReactNodeList, container: FiberRoot) {
   current.memoizedState = { element };
 
 
-  console.log('%c [  ]-9', 'font-size:13px; background:pink; color:#bf2c9f;', current)
+  console.log('%c [  ]-9', 'font-size:13px; background:pink; color:#bf2c9f;', current);
+
+  // scheduleUpdateOnFiber();
 }
