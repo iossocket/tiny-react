@@ -9,5 +9,9 @@ export const ensureRootIsScheduled = (root: FiberRoot) => {
 }
 
 const scheduleTaskForRootDuringMicrotask = (root: FiberRoot) => {
-  Scheduler.scheduleCallback(NormalPriority, performConcurrentWorkOnRoot.bind(null, root))
+  const schedulerPriorityLevel = NormalPriority;
+  Scheduler.scheduleCallback(
+    schedulerPriorityLevel,
+    performConcurrentWorkOnRoot.bind(null, root)
+  );
 }

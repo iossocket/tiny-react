@@ -1,4 +1,6 @@
 import { createWorkInProgress } from "./ReactFiber";
+import { beginWork } from "./ReactFiberBeginWork";
+import { completeWork } from "./ReactFiberCompleteWork";
 import { ensureRootIsScheduled } from "./ReactFiberRootScheduler";
 import { Fiber, FiberRoot } from "./ReactInternalTypes";
 
@@ -14,16 +16,17 @@ let executionContext: ExecutionContext = NoContext;
 let workInProgress: Fiber | null = null;
 let workInProgressRoot: FiberRoot | null = null;
 
-export const scheduleUpdateOnFiber = (root: FiberRoot, fiber: Fiber) => {
+export function scheduleUpdateOnFiber(root: FiberRoot, fiber: Fiber) {
   workInProgressRoot = root;
   workInProgress = fiber;
 
   ensureRootIsScheduled(root);
 };
 
-export const performConcurrentWorkOnRoot = (root: FiberRoot) => {
-  // 1. render, setup fiber tree VDOM
+export function performConcurrentWorkOnRoot(root: FiberRoot) {
+  // 1. render, setup fiber tree VDOM (beginWork|completeWork)
   renderRootSync(root);
+  console.log('%c [ renderRootSync ]-29', 'font-size:13px; background:pink; color:#bf2c9f;', root);
   // 2. commit, VDOM -> DOM
   // commitRoot(root);
 }
@@ -35,8 +38,10 @@ function renderRootSync(root: FiberRoot) {
   // !2. init
   prepareFreshStack(root);
   // !3. iterate setup fiber tree
+  workLoopSync();
   // !4. rend done
   executionContext = prevExecutionContext;
+  workInProgressRoot = null;
 }
 
 function prepareFreshStack(root: FiberRoot): Fiber {
@@ -45,4 +50,47 @@ function prepareFreshStack(root: FiberRoot): Fiber {
   const rootWorkInProgress = createWorkInProgress(root.current, null);
   workInProgress = rootWorkInProgress; // Fiber
   return rootWorkInProgress;
+}
+
+function workLoopSync() {
+  while (workInProgress !== null) {
+    performUnitOfWork(workInProgress);
+  }
+}
+
+function performUnitOfWork(unitOfWork: Fiber) {
+  const current = unitOfWork.alternate;
+  // 1. beginWork
+  let next = beginWork(current, unitOfWork);
+  unitOfWork.memoizedProps = unitOfWork.pendingProps;
+  if (next === null) {
+    completeUnitOfWork(unitOfWork);
+  } else {
+    workInProgress = next;
+  }
+  // 2. completeWork
+}
+
+// DFS
+function completeUnitOfWork(unitOfWork: Fiber) {
+  let completedWork: Fiber | null = unitOfWork;
+  do {
+    const current = completedWork.alternate;
+    const returnFiber = completedWork.return;
+    let next = completeWork(current, completedWork);
+
+    if (next !== null) {
+      workInProgress = next;
+      return;
+    }
+
+    const siblingFiber = completedWork.sibling;
+    if (siblingFiber !== null) {
+      workInProgress = siblingFiber;
+      return;
+    }
+
+    completedWork = returnFiber as Fiber;
+    workInProgress = completedWork;
+  } while (completedWork !== null);
 }

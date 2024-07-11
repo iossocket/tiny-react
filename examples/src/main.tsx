@@ -10,3 +10,5 @@ const jsx: any = (
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(jsx);
 
+// div.root is root fiber, type is Fiber, tag = HostRoot(3)
+// other div for example the div in jsx, type is also Fiber, tag = HostComponent(5)

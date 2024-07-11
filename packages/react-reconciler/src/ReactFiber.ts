@@ -56,24 +56,9 @@ export function createFiberFromTypeAndProps(
 ) {
   let fiberTag: WorkTag = IndeterminateComponent;
 
-  if (isFn(type)) {
-    // 函数组件、类组件
-    if (type.prototype.isReactComponent) {
-      fiberTag = ClassComponent;
-    } else {
-      fiberTag = FunctionComponent;
-    }
-  } else if (isStr(type)) {
-    // 原生标签
+  if (isStr(type)) {
+    // native tag
     fiberTag = HostComponent;
-  } else if (type === REACT_FRAGMENT_TYPE) {
-    fiberTag = Fragment;
-  } else if (type.$$typeof === REACT_PROVIDER_TYPE) {
-    fiberTag = ContextProvider;
-  } else if (type.$$typeof === REACT_CONTEXT_TYPE) {
-    fiberTag = ContextConsumer;
-  } else if (type.$$typeof === REACT_MEMO_TYPE) {
-    fiberTag = MemoComponent;
   }
 
   const fiber = createFiber(fiberTag, pendingProps, key);
