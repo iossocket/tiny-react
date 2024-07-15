@@ -1,5 +1,6 @@
 import { createWorkInProgress } from "./ReactFiber";
 import { beginWork } from "./ReactFiberBeginWork";
+import { commitMutationEffects } from "./ReactFiberCommitWork";
 import { completeWork } from "./ReactFiberCompleteWork";
 import { ensureRootIsScheduled } from "./ReactFiberRootScheduler";
 import { Fiber, FiberRoot } from "./ReactInternalTypes";
@@ -28,18 +29,35 @@ export function performConcurrentWorkOnRoot(root: FiberRoot) {
   renderRootSync(root);
   console.log('%c [ renderRootSync ]-29', 'font-size:13px; background:pink; color:#bf2c9f;', root);
   // 2. commit, VDOM -> DOM
-  // commitRoot(root);
+  const finishedWork = root.current.alternate;
+  root.finishedWork = finishedWork;
+  commitRoot(root);
 }
 
 function renderRootSync(root: FiberRoot) {
   const prevExecutionContext = executionContext;
-  // 1. start to render
+  // !1. start to render
   executionContext != RenderContext;
   // !2. init
   prepareFreshStack(root);
   // !3. iterate setup fiber tree
   workLoopSync();
   // !4. rend done
+  executionContext = prevExecutionContext;
+  workInProgressRoot = null;
+}
+
+function commitRoot(root: FiberRoot) {
+  const prevExecutionContext = executionContext;
+  // !1. start to commit
+  executionContext != CommitContext;
+
+  // !2. mutation phase, render DOM tree
+  // root.finishedWork is type of Fiber with tag HostRoot(3)
+  const finishedWork = root.finishedWork as Fiber;
+  commitMutationEffects(root, finishedWork);
+
+  // !3. commit done
   executionContext = prevExecutionContext;
   workInProgressRoot = null;
 }
