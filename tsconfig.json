@@ -1,5 +1,14 @@
 {
   "compilerOptions": {
-    "noImplicitThis": false
+    "noImplicitThis": false,
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "baseUrl": ".",
+    "paths": {
+      "*": [
+        "node_modules/*"
+      ]
+    }
   }
 }
