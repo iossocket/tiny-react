@@ -34,6 +34,7 @@ export type Fiber = {
 }
 
 export type Container = Element | Document | DocumentFragment;
+
 export type FiberRoot = {
   containerInfo: Container;
   current: Fiber;

@@ -21,7 +21,7 @@ export function scheduleUpdateOnFiber(root: FiberRoot, fiber: Fiber) {
   workInProgressRoot = root;
   workInProgress = fiber;
 
-  ensureRootIsScheduled(root);
+  ensureRootIsScheduled(root); // schedule a task to run performConcurrentWorkOnRoot()
 };
 
 export function performConcurrentWorkOnRoot(root: FiberRoot) {
@@ -29,7 +29,7 @@ export function performConcurrentWorkOnRoot(root: FiberRoot) {
   renderRootSync(root);
   console.log('%c [ renderRootSync ]-29', 'font-size:13px; background:pink; color:#bf2c9f;', root);
   // 2. commit, VDOM -> DOM
-  const finishedWork = root.current.alternate;
+  const finishedWork = root.current.alternate; // alternate is fiber tree which has been rendered in memory as vdom
   root.finishedWork = finishedWork;
   commitRoot(root);
 }
