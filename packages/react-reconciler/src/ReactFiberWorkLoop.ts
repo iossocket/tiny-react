@@ -42,7 +42,7 @@ function renderRootSync(root: FiberRoot) {
   prepareFreshStack(root);
   // !3. iterate setup fiber tree
   workLoopSync();
-  // !4. rend done
+  // !4. render done
   executionContext = prevExecutionContext;
   workInProgressRoot = null;
 }

@@ -5,7 +5,7 @@ import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 
 export function beginWork(current: Fiber | null, workInProgress: Fiber): Fiber | null {
   switch (workInProgress.tag) {
-    case HostRoot:
+    case HostRoot: // first fiber node
       return updateHostRoot(current, workInProgress);
     case HostComponent:
       return updateHostComponent(current, workInProgress);
