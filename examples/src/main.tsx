@@ -5,6 +5,7 @@ import './index.css'
 const jsx: any = (
   <div className="box border">
     <h1 className="border">omg</h1>
+    <h2>React</h2>
   </div>
 );
 

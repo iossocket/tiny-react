@@ -40,7 +40,11 @@ function finalizeInitialChildren(domElement: Element, props: any) {
 
 function appendAllChildren(parent: Element, workInProgress: Fiber) {
   let nodeFiber = workInProgress.child;
-  if (nodeFiber) {
-    parent.appendChild(nodeFiber.stateNode);
+
+  while (nodeFiber !== null) {
+    if (nodeFiber) {
+      parent.appendChild(nodeFiber.stateNode);
+    }
+    nodeFiber = nodeFiber.sibling;
   }
 }
