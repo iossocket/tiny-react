@@ -1,6 +1,6 @@
 import type { ReactElement } from "shared/ReactTypes";
 import { NoFlags } from "./ReactFiberFlags";
-import { Fiber } from "./ReactInternalTypes";
+import type { Fiber } from "./ReactInternalTypes";
 import { ClassComponent, ContextConsumer, ContextProvider, Fragment, FunctionComponent, HostComponent, IndeterminateComponent, MemoComponent, WorkTag } from "./ReactWorkTags";
 import {
   REACT_CONTEXT_TYPE,

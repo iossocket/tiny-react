@@ -1,6 +1,6 @@
-import { ReactElement } from "shared/ReactTypes";
+import type { ReactElement } from "shared/ReactTypes";
 import { Placement } from "./ReactFiberFlags";
-import { Fiber } from "./ReactInternalTypes";
+import type { Fiber } from "./ReactInternalTypes";
 import { createFiberFromElement } from "./ReactFiber";
 import { REACT_ELEMENT_TYPE } from "shared/ReactSymbols";
 

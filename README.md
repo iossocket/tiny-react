@@ -28,8 +28,7 @@ ReactDOMRoot:
 ![image](doc/ReactDOM.createRoot.png)
 
 2. what was `react-reconciler` designed for?
-
-2.1 expose `scheduleUpdateOnFiber` to `react`
-2.2 interact with `scheduler`, register task for scheduling and what for the callback
-2.3 execute the callback of task, setup virtual dom in memory. meanwhile interact with `react-dom`, according to virtual DOM, setup(construct) DOM
-2.4 interact with `react-dom` render DOM node.
+    1. expose `scheduleUpdateOnFiber` to `react`
+    2. interact with `scheduler`, register task for scheduling and what for the callback
+    3. execute the callback of task, setup virtual dom in memory. meanwhile interact with `react-dom`, according to virtual DOM, setup(construct) DOM
+    4. interact with `react-dom` render DOM node.

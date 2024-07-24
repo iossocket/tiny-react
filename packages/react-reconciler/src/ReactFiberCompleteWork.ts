@@ -1,5 +1,5 @@
 import { isNum, isStr } from "shared/utils";
-import { Fiber } from "./ReactInternalTypes";
+import type { Fiber } from "./ReactInternalTypes";
 import { HostComponent, HostRoot } from "./ReactWorkTags";
 
 export function completeWork(current: Fiber | null, workInProgress: Fiber): Fiber | null {

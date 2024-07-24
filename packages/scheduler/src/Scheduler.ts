@@ -28,6 +28,7 @@ let currentPriorityLevel: PriorityLevel = NoPriority;
 
 let taskIdCounter = 1;
 let startTime = -1;
+// time slice duration, default value is 5ms, if one task executed more than 5ms, give back the control to browser before starting to run next task
 let frameInterval = 5;
 
 // to check any work is running
@@ -71,7 +72,7 @@ export function scheduleCallback(priorityLevel: PriorityLevel, callback: Callbac
 
   newTask.sortIndex = expirationTime;
   push(taskQueue, newTask);
-
+  // if no task is executing now, trigger the loop to execute the task, which just added right now
   if (!isHostCallbackScheduled && !isPerformingWork) {
     isHostCallbackScheduled = true;
     requestHostCallback();
