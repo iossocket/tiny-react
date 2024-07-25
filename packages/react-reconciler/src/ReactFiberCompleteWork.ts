@@ -1,8 +1,9 @@
 import { isNum, isStr } from "shared/utils";
 import type { Fiber } from "./ReactInternalTypes";
-import { HostComponent, HostRoot } from "./ReactWorkTags";
+import { HostComponent, HostRoot, HostText } from "./ReactWorkTags";
 
 export function completeWork(current: Fiber | null, workInProgress: Fiber): Fiber | null {
+  const newProps = workInProgress.pendingProps;
   switch (workInProgress.tag) {
     case HostRoot:
       return null;
@@ -11,10 +12,14 @@ export function completeWork(current: Fiber | null, workInProgress: Fiber): Fibe
       const { type } = workInProgress;
       const instance = document.createElement(type);
       // 2. init dom with properties
-      finalizeInitialChildren(instance, workInProgress.pendingProps);
+      finalizeInitialChildren(instance, newProps);
       // 3. mount child dom to parent dom
       appendAllChildren(instance, workInProgress);
       workInProgress.stateNode = instance;
+      return null;
+    }
+    case HostText: {
+      workInProgress.stateNode = document.createTextNode(newProps);
       return null;
     }
 

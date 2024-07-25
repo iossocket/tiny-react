@@ -1,6 +1,6 @@
 import { isNum, isStr } from "shared/utils";
 import type { Fiber } from "./ReactInternalTypes";
-import { HostComponent, HostRoot } from "./ReactWorkTags";
+import { HostComponent, HostRoot, HostText } from "./ReactWorkTags";
 import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 
 export function beginWork(current: Fiber | null, workInProgress: Fiber): Fiber | null {
@@ -9,6 +9,8 @@ export function beginWork(current: Fiber | null, workInProgress: Fiber): Fiber |
       return updateHostRoot(current, workInProgress);
     case HostComponent:
       return updateHostComponent(current, workInProgress);
+    case HostText:
+      return updateHostText(current, workInProgress);
   }
   throw new Error(
     `Unknown unit of work tag (${workInProgress.tag}). This error is likely caused by a bug in ` +
@@ -53,6 +55,11 @@ function reconcileChildren(
       nextChildren
     );
   }
+}
+
+// content has no children nodes, no need to reconcile
+function updateHostText(current: Fiber | null, workInProgress: Fiber) {
+  return null;
 }
 
 function shouldSetTextContent(type: string, props: any): boolean {

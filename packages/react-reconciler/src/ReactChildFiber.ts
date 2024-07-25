@@ -1,7 +1,7 @@
 import type { ReactElement } from "shared/ReactTypes";
 import { Placement } from "./ReactFiberFlags";
 import type { Fiber } from "./ReactInternalTypes";
-import { createFiberFromElement } from "./ReactFiber";
+import { createFiberFromElement, createFiberFromText } from "./ReactFiber";
 import { REACT_ELEMENT_TYPE } from "shared/ReactSymbols";
 import { isArray } from "shared/utils";
 
@@ -32,7 +32,22 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
     return created;
   }
 
+  function reconcileSingleTextNode(
+    returnFiber: Fiber,
+    currentFirstChild: Fiber | null,
+    textContent: string
+  ) {
+    const created = createFiberFromText(textContent);
+    created.return = returnFiber;
+    return created;
+  }
+
   function createChild(returnFiber: Fiber, newChild: any) {
+    if (isText(newChild)) {
+      const created = createFiberFromText(newChild + "");
+      created.return = returnFiber;
+      return created;
+    }
     if (typeof newChild === "object" && newChild !== null) {
       switch (newChild.$$typeof) {
         case REACT_ELEMENT_TYPE: {
@@ -82,6 +97,12 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
     currentFirstChild: Fiber | null,
     newChild: any
   ) {
+
+    if (isText(newChild)) {
+      return placeSingleChild(
+        reconcileSingleTextNode(returnFiber, currentFirstChild, "" + newChild)
+      );
+    }
     if (typeof newChild === "object" && newChild !== null) {
       switch (newChild.$$typeof) {
         case REACT_ELEMENT_TYPE: {
@@ -98,4 +119,11 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
     return null;
   }
   return reconcileChildFibers;
+}
+
+function isText(newChild: any) {
+  return (
+    (typeof newChild === "string" && newChild !== "") ||
+    typeof newChild === "number"
+  );
 }
