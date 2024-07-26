@@ -28,15 +28,19 @@ function commitReconciliationEffects(finishedWork: Fiber) {
 }
 
 function commitPlacement(finishedWork: Fiber) {
-  const parentFiber = getHostParentFiber(finishedWork);
   if (finishedWork.stateNode && (finishedWork.tag === HostComponent || finishedWork.tag === HostText)) {
-    // dom
-    let parent = parentFiber.stateNode;
-    if (parent.containerInfo) {
-      parent = parent.containerInfo;
+    const parentFiber = getHostParentFiber(finishedWork);
+    let parentDom = parentFiber.stateNode;
+    if (parentDom.containerInfo) {
+      parentDom = parentDom.containerInfo;
     }
-    // dom
-    parent.appendChild(finishedWork.stateNode);
+    parentDom.appendChild(finishedWork.stateNode);
+  } else {
+    let child = finishedWork.child;
+    while (child !== null) {
+      commitPlacement(child);
+      child = child.sibling;
+    }
   }
 }
 

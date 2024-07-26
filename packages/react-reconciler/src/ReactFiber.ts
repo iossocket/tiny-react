@@ -59,6 +59,8 @@ export function createFiberFromTypeAndProps(
   if (isStr(type)) {
     // native tag
     fiberTag = HostComponent;
+  } else if (type === REACT_FRAGMENT_TYPE) {
+    fiberTag = Fragment;
   }
 
   const fiber = createFiber(fiberTag, pendingProps, key);

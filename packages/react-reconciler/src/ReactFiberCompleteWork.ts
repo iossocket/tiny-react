@@ -1,10 +1,11 @@
 import { isNum, isStr } from "shared/utils";
 import type { Fiber } from "./ReactInternalTypes";
-import { HostComponent, HostRoot, HostText } from "./ReactWorkTags";
+import { Fragment, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
 
 export function completeWork(current: Fiber | null, workInProgress: Fiber): Fiber | null {
   const newProps = workInProgress.pendingProps;
   switch (workInProgress.tag) {
+    case Fragment:
     case HostRoot:
       return null;
     case HostComponent: {
@@ -45,10 +46,23 @@ function finalizeInitialChildren(domElement: Element, props: any) {
 
 function appendAllChildren(parent: Element, workInProgress: Fiber) {
   let nodeFiber = workInProgress.child;
-
   while (nodeFiber !== null) {
-    if (nodeFiber) {
+    if (nodeFiber.tag === HostComponent || nodeFiber.tag === HostText) {
       parent.appendChild(nodeFiber.stateNode);
+    } else if (nodeFiber.child !== null) {
+      nodeFiber = nodeFiber.child;
+      continue;
+    }
+
+    if (nodeFiber === workInProgress) {
+      return;
+    }
+
+    while (nodeFiber.sibling === null) {
+      if (nodeFiber.return === null || nodeFiber.return === workInProgress) {
+        return;
+      }
+      nodeFiber = nodeFiber.return;
     }
     nodeFiber = nodeFiber.sibling;
   }
