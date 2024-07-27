@@ -49,12 +49,23 @@ export function createFiberFromElement(element: ReactElement) {
   return fiber;
 }
 
+function shouldConstruct(Component: Function) {
+  const prototype = Component.prototype;
+  return !!(prototype && prototype.isReactComponent)
+}
+
 export function createFiberFromTypeAndProps(
   type: any,
   key: null | string,
   pendingProps: any
 ) {
   let fiberTag: WorkTag = IndeterminateComponent;
+
+  if (typeof type === "function") {
+    if (shouldConstruct(type)) {
+      fiberTag = ClassComponent;
+    }
+  }
 
   if (isStr(type)) {
     // native tag

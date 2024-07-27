@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ReactDOM } from "../which-react";
+import { ReactDOM, Component } from "../which-react";
 import './index.css'
 
 const fragment: any = (
@@ -9,12 +9,28 @@ const fragment: any = (
   </>
 );
 
+
+class ClassComponent extends (Component as any) {
+  constructor(props: any, context: any) {
+    super(props, context);
+  }
+
+  render() {
+    return (
+      <div>
+        <h3>ClassComponent</h3>
+      </div>
+    );
+  }
+}
+
 const jsx: any = (
   <div className="box border">
     <h1 className="border">H1 in native dom node</h1>
     <h2>React</h2>
     Pure Text
     {fragment}
+    <ClassComponent />
   </div>
 );
 

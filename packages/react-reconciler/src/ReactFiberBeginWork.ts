@@ -1,6 +1,6 @@
 import { isNum, isStr } from "shared/utils";
 import type { Fiber } from "./ReactInternalTypes";
-import { Fragment, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
+import { ClassComponent, Fragment, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
 import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 
 export function beginWork(current: Fiber | null, workInProgress: Fiber): Fiber | null {
@@ -13,6 +13,8 @@ export function beginWork(current: Fiber | null, workInProgress: Fiber): Fiber |
       return updateHostText(current, workInProgress);
     case Fragment:
       return updateFragment(current, workInProgress);
+    case ClassComponent:
+      return updateClassComponent(current, workInProgress);
   }
   throw new Error(
     `Unknown unit of work tag (${workInProgress.tag}). This error is likely caused by a bug in ` +
@@ -51,6 +53,17 @@ function updateHostText(current: Fiber | null, workInProgress: Fiber) {
 function updateFragment(current: Fiber | null, workInProgress: Fiber) {
   const nextChildren = workInProgress.pendingProps.children;
   reconcileChildren(current, workInProgress, nextChildren);
+  return workInProgress.child;
+}
+
+function updateClassComponent(current: Fiber | null, workInProgress: Fiber) {
+  const { type, pendingProps } = workInProgress;
+  const instance = new type(pendingProps);
+  workInProgress.stateNode = instance;
+
+  const children = instance.render();
+
+  reconcileChildren(current, workInProgress, children);
   return workInProgress.child;
 }
 
