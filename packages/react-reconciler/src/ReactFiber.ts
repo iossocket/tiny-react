@@ -64,6 +64,8 @@ export function createFiberFromTypeAndProps(
   if (typeof type === "function") {
     if (shouldConstruct(type)) {
       fiberTag = ClassComponent;
+    } else {
+      fiberTag = FunctionComponent;
     }
   }
 

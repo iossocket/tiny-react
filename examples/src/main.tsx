@@ -9,6 +9,12 @@ const fragment: any = (
   </>
 );
 
+const FunctionComponent = ({ name }: { name: string }) => {
+  return <div>
+    <h4>{name}</h4>
+  </div>
+}
+
 
 class ClassComponent extends (Component as any) {
   constructor(props: any, context: any) {
@@ -30,6 +36,7 @@ const jsx: any = (
     <h2>React</h2>
     Pure Text
     {fragment}
+    <FunctionComponent name="FunctionComponent" />
     <ClassComponent />
   </div>
 );
