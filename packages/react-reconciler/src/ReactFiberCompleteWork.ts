@@ -38,7 +38,7 @@ function finalizeInitialChildren(domElement: Element, props: any) {
     const nextProp = props[propKey];
     if (propKey === "children") {
       if (isStr(nextProp) || isNum(nextProp)) {
-        domElement.textContent = nextProp;
+        domElement.textContent = nextProp + "";
       }
     } else {
       (domElement as any)[propKey] = nextProp;
