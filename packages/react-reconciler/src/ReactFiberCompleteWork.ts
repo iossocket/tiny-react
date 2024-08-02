@@ -42,6 +42,9 @@ function finalizeInitialChildren(domElement: Element, props: any) {
       }
     } else {
       (domElement as any)[propKey] = nextProp;
+      if (propKey === "onClick") {
+        domElement.addEventListener("click", nextProp);
+      }
     }
   }
 }

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ReactDOM, Component } from "../which-react";
+import { ReactDOM, Component, useReducer } from "../which-react";
 import './index.css'
 
 const fragment: any = (
@@ -10,8 +10,14 @@ const fragment: any = (
 );
 
 const FunctionComponent = ({ name }: { name: string }) => {
+  const [count, setCount] = useReducer((x: number) => x + 1, 0);
   return <div>
     <h4>{name}</h4>
+    <button onClick={() => {
+      setCount();
+    }}>
+      {count}
+    </button>
   </div>
 }
 
