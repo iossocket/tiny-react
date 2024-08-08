@@ -27,6 +27,9 @@ export function beginWork(current: Fiber | null, workInProgress: Fiber): Fiber |
 function updateHostRoot(current: Fiber | null, workInProgress: Fiber) {
   const nextChildren = workInProgress.memoizedState.element;
   reconcileChildren(current, workInProgress, nextChildren);
+  if (current) {
+    current.child = workInProgress.child;
+  }
   return workInProgress.child;
 }
 

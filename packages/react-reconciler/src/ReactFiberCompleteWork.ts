@@ -11,14 +11,18 @@ export function completeWork(current: Fiber | null, workInProgress: Fiber): Fibe
     case HostRoot:
       return null;
     case HostComponent: {
-      // 1. create DOM
       const { type } = workInProgress;
-      const instance = document.createElement(type);
-      // 2. init dom with properties
-      finalizeInitialChildren(instance, newProps);
-      // 3. mount child dom to parent dom
-      appendAllChildren(instance, workInProgress);
-      workInProgress.stateNode = instance;
+      if (current !== null && workInProgress.stateNode !== null) {
+        updateHostComponent(current, workInProgress, type, newProps);
+      } else {
+        // 1. create DOM
+        const instance = document.createElement(type);
+        // 2. init dom with properties
+        finalizeInitialChildren(instance, null, newProps);
+        // 3. mount child dom to parent dom
+        appendAllChildren(instance, workInProgress);
+        workInProgress.stateNode = instance;
+      }
       return null;
     }
     case HostText: {
@@ -33,17 +37,44 @@ export function completeWork(current: Fiber | null, workInProgress: Fiber): Fibe
   );
 }
 
-function finalizeInitialChildren(domElement: Element, props: any) {
-  for (const propKey in props) {
-    const nextProp = props[propKey];
+function updateHostComponent(current: Fiber, workInProgress: Fiber, type: string, newProps: any) {
+  if (current.memoizedProps === newProps) {
+    return;
+  }
+  finalizeInitialChildren(
+    workInProgress.stateNode as Element,
+    current.memoizedProps,
+    newProps
+  );
+}
+
+function finalizeInitialChildren(domElement: Element, prevProps: any, nextProps: any) {
+  for (const propKey in prevProps) {
+    const prevProp = prevProps[propKey];
+    if (propKey === "children") {
+      if (isStr(prevProp) || isNum(prevProp)) {
+        domElement.textContent = "";
+      }
+    } else {
+      if (propKey === "onClick") {
+        domElement.removeEventListener("click", prevProp);
+      } else {
+        (domElement as any)[propKey] = "";
+      }
+    }
+  }
+
+  for (const propKey in nextProps) {
+    const nextProp = nextProps[propKey];
     if (propKey === "children") {
       if (isStr(nextProp) || isNum(nextProp)) {
         domElement.textContent = nextProp + "";
       }
     } else {
-      (domElement as any)[propKey] = nextProp;
       if (propKey === "onClick") {
         domElement.addEventListener("click", nextProp);
+      } else {
+        (domElement as any)[propKey] = nextProp;
       }
     }
   }

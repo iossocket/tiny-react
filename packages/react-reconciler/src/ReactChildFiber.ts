@@ -1,7 +1,7 @@
 import type { ReactElement } from "shared/ReactTypes";
 import { Placement } from "./ReactFiberFlags";
 import type { Fiber } from "./ReactInternalTypes";
-import { createFiberFromElement, createFiberFromText } from "./ReactFiber";
+import { createFiberFromElement, createFiberFromText, createWorkInProgress } from "./ReactFiber";
 import { REACT_ELEMENT_TYPE } from "shared/ReactSymbols";
 import { isArray } from "shared/utils";
 
@@ -14,6 +14,13 @@ type ChildReconciler = (
 export const reconcileChildFibers: ChildReconciler = createChildReconciler(true);
 export const mountChildFibers: ChildReconciler = createChildReconciler(false);
 
+function useFiber(fiber: Fiber, pendingProps: any): Fiber {
+  const clone = createWorkInProgress(fiber, pendingProps);
+  clone.index = 0;
+  clone.sibling = null;
+  return clone;
+}
+
 function createChildReconciler(shouldTrackSideEffects: boolean) {
   function placeSingleChild(newFiber: Fiber) {
     if (shouldTrackSideEffects && newFiber.alternate === null) {
@@ -22,12 +29,31 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
     return newFiber;
   }
 
+  // reconcile single node, for mount phase, won't involve comparing and reusing existing node
   function reconcileSingleElement(
     returnFiber: Fiber,
     currentFirstChild: Fiber | null,
-    newChild: ReactElement
+    element: ReactElement
   ) {
-    const created = createFiberFromElement(newChild);
+    const key = element.key;
+    let child = currentFirstChild;
+    while (child !== null) {
+      if (child.key === key) {
+        const elementType = element.type;
+        // reuse when both key and type are same
+        if (child.elementType === elementType) {
+          const existing = useFiber(child, element.props);
+          existing.return = returnFiber;
+          return existing;
+        }
+        break;
+      } else {
+        // 
+      }
+      child = child.sibling;
+    }
+
+    const created = createFiberFromElement(element);
     created.return = returnFiber;
     return created;
   }

@@ -66,7 +66,9 @@ function prepareFreshStack(root: FiberRoot): Fiber {
   root.finishedWork = null; // the work need to commit, the work comes from workInProgress
   workInProgressRoot = root; // FiberRoot
   const rootWorkInProgress = createWorkInProgress(root.current, null);
-  workInProgress = rootWorkInProgress; // Fiber
+  if (workInProgress === null) {
+    workInProgress = rootWorkInProgress; // Fiber
+  }
   return rootWorkInProgress;
 }
 
@@ -80,8 +82,13 @@ function performUnitOfWork(unitOfWork: Fiber) {
   const current = unitOfWork.alternate;
   // 1. beginWork
   let next = beginWork(current, unitOfWork);
+  // ! update memoizedProps with pendingProps
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
+  // 1.1 exec itself
+  // 1.2 reconcile & bailout, return child node
   if (next === null) {
+    // no more work
+    // !2. completeWork
     completeUnitOfWork(unitOfWork);
   } else {
     workInProgress = next;
