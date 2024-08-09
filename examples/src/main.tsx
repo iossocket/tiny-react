@@ -14,6 +14,7 @@ const FunctionComponent = ({ name }: { name: string }) => {
   return <div>
     <h4>{name}</h4>
     <button onClick={() => {
+      console.log('%c [ onClick ]-17', 'font-size:13px; background:pink; color:#bf2c9f;',)
       setCount();
     }}>
       {count}
@@ -47,7 +48,9 @@ const jsx: any = (
   </div>
 );
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(jsx);
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+  (<FunctionComponent name="FunctionComponent" />) as any
+);
 
 // ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render("Hello World");
 

@@ -2,6 +2,7 @@ import { isNum, isStr } from "shared/utils";
 import type { Fiber } from "./ReactInternalTypes";
 import { ClassComponent, Fragment, FunctionComponent, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
 import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
+import { renderWithHooks } from "./ReactFiberHooks";
 
 export function beginWork(current: Fiber | null, workInProgress: Fiber): Fiber | null {
   switch (workInProgress.tag) {
@@ -74,10 +75,7 @@ function updateClassComponent(current: Fiber | null, workInProgress: Fiber) {
 
 function updateFunctionComponent(current: Fiber | null, workInProgress: Fiber) {
   const { type, pendingProps } = workInProgress;
-  const instance = type(pendingProps);
-  workInProgress.stateNode = instance;
-
-  const children = instance;
+  const children = renderWithHooks(current, workInProgress, type, pendingProps);
 
   reconcileChildren(current, workInProgress, children);
   return workInProgress.child;

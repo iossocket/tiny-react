@@ -7,7 +7,7 @@ type Hook = {
   next: null | Hook;
 }
 
-let currentlyRenderFiber: Fiber | null = null;
+let currentlyRenderingFiber: Fiber | null = null;
 let workInProgressHook: Hook | null = null;
 let currentHook: Hook | null = null;
 
@@ -17,7 +17,7 @@ export function renderWithHooks<Props>(
   Component: any,
   props: Props
 ): any {
-  currentlyRenderFiber = workInProgress;
+  currentlyRenderingFiber = workInProgress;
   workInProgress.memoizedState = null;
 
   let children = Component(props);
@@ -28,7 +28,7 @@ export function renderWithHooks<Props>(
 }
 
 function finishRenderingHooks() {
-  currentlyRenderFiber = null;
+  currentlyRenderingFiber = null;
   currentHook = null;
   workInProgressHook = null;
 }
@@ -44,14 +44,14 @@ export function useReducer<S, I, A>(
   const hook: Hook = updateWorkInProgressHook();
 
   let initialState: S;
-  if (init) {
+  if (init !== undefined) {
     initialState = init(initialArg);
   } else {
     initialState = initialArg as any;
   }
 
   // !2. differentiate mount & update
-  if (!currentlyRenderFiber.alternate) {
+  if (!currentlyRenderingFiber.alternate) {
     // render at very first time
     hook.memorizedState = initialState;
   }
@@ -59,7 +59,7 @@ export function useReducer<S, I, A>(
   // !3 dispatch
   const dispatch: Dispatch<A> = dispatchReducerAction.bind(
     null,
-    currentlyRenderFiber,
+    currentlyRenderingFiber,
     hook,
     reducer
   )
@@ -69,15 +69,16 @@ export function useReducer<S, I, A>(
 
 function updateWorkInProgressHook(): Hook {
   let hook: Hook;
-  const current = currentlyRenderFiber.alternate;
+  const current = currentlyRenderingFiber.alternate;
   if (current) {
+    console.log('%c [ update hook ]-74', 'font-size:13px; background:pink; color:#bf2c9f;',)
     // update
-    currentlyRenderFiber.memoizedState = current.memoizedState;
+    currentlyRenderingFiber.memoizedState = current.memoizedState;
     if (workInProgressHook) {
       workInProgressHook = hook = workInProgressHook.next;
       currentHook = currentHook.next;
     } else {
-      hook = workInProgressHook = currentlyRenderFiber.memoizedState;
+      hook = workInProgressHook = currentlyRenderingFiber.memoizedState;
       currentHook = current.memoizedState;
     }
   } else {
@@ -87,7 +88,7 @@ function updateWorkInProgressHook(): Hook {
     if (workInProgressHook) {
       workInProgressHook = workInProgressHook.next = hook;
     } else {
-      workInProgressHook = currentlyRenderFiber.memoizedState = hook;
+      workInProgressHook = currentlyRenderingFiber.memoizedState = hook;
     }
   }
 
@@ -101,6 +102,7 @@ function dispatchReducerAction<S, I, A>(
   action: any
 ) {
   hook.memorizedState = reducer ? reducer(hook.memorizedState, action) : action;
+  console.log('%c [ hook.memorizedState ]-104', 'font-size:13px; background:pink; color:#bf2c9f;', hook.memorizedState);
   const root = getRootForUpdatedFiber(fiber);
   fiber.alternate = { ...fiber };
   if (fiber.sibling) {
