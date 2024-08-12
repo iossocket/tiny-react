@@ -1,5 +1,5 @@
 import type { ReactElement } from "shared/ReactTypes";
-import { Placement } from "./ReactFiberFlags";
+import { ChildDeletion, Placement } from "./ReactFiberFlags";
 import type { Fiber } from "./ReactInternalTypes";
 import { createFiberFromElement, createFiberFromText, createWorkInProgress } from "./ReactFiber";
 import { REACT_ELEMENT_TYPE } from "shared/ReactSymbols";
@@ -22,6 +22,31 @@ function useFiber(fiber: Fiber, pendingProps: any): Fiber {
 }
 
 function createChildReconciler(shouldTrackSideEffects: boolean) {
+  function deleteChild(returnFiber: Fiber, deletingFiber: Fiber) {
+    if (!shouldTrackSideEffects) {
+      return;
+    }
+
+    if (returnFiber.deletions === null) {
+      returnFiber.deletions = [deletingFiber];
+      returnFiber.flags |= ChildDeletion;
+    } else {
+      returnFiber.deletions.push(deletingFiber);
+    }
+  }
+
+  function deleteRemainingChildren(returnFiber: Fiber, frontDeletingFiber: Fiber) {
+    if (!shouldTrackSideEffects) {
+      return;
+    }
+
+    let currentFiber = frontDeletingFiber;
+    while (currentFiber !== null) {
+      deleteChild(returnFiber, currentFiber);
+      currentFiber = currentFiber.sibling;
+    }
+  }
+
   function placeSingleChild(newFiber: Fiber) {
     if (shouldTrackSideEffects && newFiber.alternate === null) {
       newFiber.flags |= Placement;
@@ -45,10 +70,14 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
           const existing = useFiber(child, element.props);
           existing.return = returnFiber;
           return existing;
+        } else {
+          // can not exist nodes with same key in the same tree level
+          deleteRemainingChildren(returnFiber, child);
         }
         break;
       } else {
-        // 
+        // delete single child
+        deleteChild(returnFiber, child);
       }
       child = child.sibling;
     }
@@ -144,6 +173,7 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
     }
     return null;
   }
+
   return reconcileChildFibers;
 }
 

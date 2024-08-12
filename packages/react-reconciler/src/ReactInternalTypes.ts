@@ -31,6 +31,9 @@ export type Fiber = {
   flags: Flags;
 
   alternate: Fiber | null;
+
+  // the fibers need to be deleted
+  deletions: Array<Fiber> | null;
 }
 
 export type Container = Element | Document | DocumentFragment;

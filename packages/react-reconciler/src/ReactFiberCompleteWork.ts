@@ -103,3 +103,7 @@ function appendAllChildren(parent: Element, workInProgress: Fiber) {
     nodeFiber = nodeFiber.sibling;
   }
 }
+
+export function isHost(fiber: Fiber): boolean {
+  return fiber.tag === HostComponent || fiber.tag === HostText;
+}

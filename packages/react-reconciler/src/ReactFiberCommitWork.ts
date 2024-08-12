@@ -1,4 +1,5 @@
-import { Placement } from "./ReactFiberFlags";
+import { isHost } from "./ReactFiberCompleteWork";
+import { ChildDeletion, Placement } from "./ReactFiberFlags";
 import type { Fiber, FiberRoot } from "./ReactInternalTypes";
 import { HostComponent, HostRoot, HostText } from "./ReactWorkTags";
 
@@ -24,6 +25,31 @@ function commitReconciliationEffects(finishedWork: Fiber) {
   if (flags & Placement) {
     commitPlacement(finishedWork);
     finishedWork.flags &= ~Placement;
+  }
+
+  if (flags & ChildDeletion) {
+    const parentFiber = isHostParent(finishedWork) ? finishedWork : getHostParentFiber(finishedWork);
+    const parentDOM = parentFiber.stateNode;
+    commitDeletions(finishedWork.deletions, parentDOM);
+
+    finishedWork.flags &= ~ChildDeletion;
+    finishedWork.deletions = null;
+  }
+}
+
+function commitDeletions(deletions: Array<Fiber>, parentDOM: Element | Document | DocumentFragment) {
+  deletions.forEach(deletion => {
+    parentDOM.removeChild(getStateNode(deletion));
+  });
+}
+
+function getStateNode(fiber: Fiber) {
+  let node = fiber;
+  while (true) {
+    if (isHost(node) && node.stateNode) {
+      return node.stateNode;
+    }
+    node = node.child as Fiber;
   }
 }
 

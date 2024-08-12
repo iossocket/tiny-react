@@ -40,6 +40,8 @@ function FiberNode(tag: WorkTag, pendingProps: any, key: null | string) {
   this.flags = NoFlags;
 
   this.alternate = null;
+
+  this.deletions = null;
 }
 
 export function createFiberFromElement(element: ReactElement) {

@@ -11,14 +11,18 @@ const fragment: any = (
 
 const FunctionComponent = ({ name }: { name: string }) => {
   const [count, setCount] = useReducer((x: number) => x + 1, 0);
-  return <div>
-    <h4>{name}</h4>
-    <button onClick={() => {
+  return <div className="border">
+    {/* <h4>{name}</h4> */}
+    {count % 2 === 0 ? <button onClick={() => {
       console.log('%c [ onClick ]-17', 'font-size:13px; background:pink; color:#bf2c9f;',)
       setCount();
     }}>
       {count}
-    </button>
+    </button> : <span onClick={() => {
+      console.log('%c [ onClick ]-17', 'font-size:13px; background:pink; color:#bf2c9f;',)
+      setCount();
+    }}>React</span>}
+
   </div>
 }
 
