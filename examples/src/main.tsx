@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ReactDOM, Component, useReducer } from "../which-react";
 import './index.css'
@@ -23,6 +24,23 @@ const FunctionComponent = ({ name }: { name: string }) => {
       setCount();
     }}>React</span>}
 
+  </div>
+}
+
+const FunctionComponent_ModifyLastEle = () => {
+  const [count, setCount] = useReducer((x: number) => x + 1, 0);
+  const arr = count % 2 === 0 ? [0, 1, 2, 3, 4] : [0, 1, 2, 3]
+  return <div className="border">
+    <h3>FunctionComponent_ModifyLastEle</h3>
+    <button onClick={() => {
+      console.log('%c [ onClick ]-17', 'font-size:13px; background:pink; color:#bf2c9f;',)
+      setCount();
+    }}>
+      {count}
+    </button>
+    <ul>
+      {arr.map(ele => <li key={ele}>{ele}</li>)}
+    </ul>
   </div>
 }
 
@@ -53,7 +71,7 @@ const jsx: any = (
 );
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  (<FunctionComponent name="FunctionComponent" />) as any
+  (<FunctionComponent_ModifyLastEle />) as any
 );
 
 // ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render("Hello World");
