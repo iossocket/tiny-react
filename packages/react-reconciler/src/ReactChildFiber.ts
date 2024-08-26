@@ -51,7 +51,7 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
 
   function reconcileSingleTextNode(
     returnFiber: Fiber,
-    currentFirstChild: Fiber | null,
+    currentFirstChild: Fiber | null,  // TODO update
     textContent: string
   ) {
     const created = createFiberFromText(textContent);
@@ -168,6 +168,7 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
       // create or reuse the text node
       return updateTextNode(returnFiber, oldFiber, newChild + "");
     }
+
     if (typeof newChild === "object" && newChild !== null) {
       if (newChild.key === key) {
         return updateElement(returnFiber, oldFiber, newChild);
@@ -186,6 +187,7 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
     if (!shouldTrackSideEffects) {
       return lastPlacedIndex;
     }
+
     const current = newFiber.alternate;
     if (current !== null) {
       const oldIndex = current.index;
@@ -202,6 +204,35 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
       // newly increased
       newFiber.flags |= Placement;
       return lastPlacedIndex;
+    }
+  }
+
+  function mapRemainingChildren(oldFiber: Fiber): Map<string | number, Fiber> {
+    const existingChildren: Map<string | number, Fiber> = new Map();
+    let existingChild: Fiber | null = oldFiber;
+    while (existingChild !== null) {
+      if (existingChild.key !== null) {
+        existingChildren.set(existingChild.key, existingChild);
+      } else {
+        existingChildren.set(existingChild.index, existingChild);
+      }
+      existingChild = existingChild.sibling;
+    }
+    return existingChildren;
+  }
+
+  function updateFromMap(
+    existingChildren: Map<string | number, Fiber>,
+    returnFiber: Fiber,
+    newIdx: number,
+    newChild: any
+  ) {
+    if (isText(newChild)) {
+      const matchedFiber = existingChildren.get(newIdx) || null;
+      return updateTextNode(returnFiber, matchedFiber, newChild + "");
+    } else {
+      const matchedFiber = existingChildren.get(newChild.key === null ? newIdx : newChild.key) || null;
+      return updateElement(returnFiber, matchedFiber, newChild);
     }
   }
 
@@ -280,8 +311,34 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
       return resultFirstChild;
     }
 
-    // !3. After comparation, there are fibers left in new fiber linked list and old fiber linked list.
-    // TODO
+    // !2.3 After comparation, there are fibers left in new fiber linked list and old fiber linked list.
+    const existingChildren = mapRemainingChildren(oldFiber);
+    for (; newIdx < newChildren.length; newIdx++) {
+      const newFiber = updateFromMap(
+        existingChildren,
+        returnFiber,
+        newIdx,
+        newChildren[newIdx]
+      );
+      if (newFiber !== null) {
+        if (shouldTrackSideEffects) {
+          existingChildren.delete(newFiber.key === null ? newIdx : newFiber.key);
+        }
+
+        lastPlacedIndex = placeChild(returnFiber, lastPlacedIndex, newIdx);
+        if (previousNewFiber === null) {
+          resultFirstChild = newFiber;
+        } else {
+          previousNewFiber.sibling = newFiber;
+        }
+        previousNewFiber = newFiber;
+      }
+    }
+
+    // !3. new fiber nodes have been constructed, handle the rest of old fibers
+    if (shouldTrackSideEffects) {
+      existingChildren.forEach(child => deleteChild(returnFiber, child));
+    }
     return resultFirstChild;
   }
 
