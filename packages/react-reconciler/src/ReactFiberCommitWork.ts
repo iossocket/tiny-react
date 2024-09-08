@@ -53,6 +53,47 @@ function getStateNode(fiber: Fiber) {
   }
 }
 
+function getHostSibling(fiber: Fiber) {
+  let node = fiber;
+  sibling: while (1) {
+    while (node.sibling === null) {
+      if (node.return === null || isHostParent(node.return)) {
+        return null;
+      }
+      node = node.return;
+    }
+    // todo
+    node = node.sibling;
+    while (!isHost(node)) {
+      if (node.flags & Placement) {
+        continue sibling;
+      }
+      if (node.child === null) {
+        continue sibling;
+      } else {
+        node = node.child;
+      }
+    }
+
+    // HostComponent|HostText
+    if (!(node.flags & Placement)) {
+      return node.stateNode;
+    }
+  }
+}
+
+function insertOrAppendPlacementNode(
+  node: Fiber,
+  before: Element,
+  parent: Element
+) {
+  if (before) {
+    parent.insertBefore(getStateNode(node), before);
+  } else {
+    parent.appendChild(getStateNode(node));
+  }
+}
+
 function commitPlacement(finishedWork: Fiber) {
   if (finishedWork.stateNode && (finishedWork.tag === HostComponent || finishedWork.tag === HostText)) {
     const parentFiber = getHostParentFiber(finishedWork);
@@ -60,7 +101,8 @@ function commitPlacement(finishedWork: Fiber) {
     if (parentDom.containerInfo) {
       parentDom = parentDom.containerInfo;
     }
-    parentDom.appendChild(finishedWork.stateNode);
+    const before = getHostSibling(finishedWork);
+    insertOrAppendPlacementNode(finishedWork, before, parentDom);
   } else {
     let child = finishedWork.child;
     while (child !== null) {

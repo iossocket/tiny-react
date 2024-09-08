@@ -28,7 +28,7 @@ const FunctionComponent = ({ name }: { name: string }) => {
 }
 
 const FunctionComponent_ModifyLastEle = () => {
-  const [count, setCount] = useReducer((x: number) => x + 1, 0);
+  const [count, setCount] = useReducer((x: number) => x + 1, 1);
   const arr = count % 2 === 0 ? [0, 1, 2, 3, 4] : [0, 1, 2, 4]
   return <div className="border">
     <h3>FunctionComponent_ModifyLastEle</h3>
