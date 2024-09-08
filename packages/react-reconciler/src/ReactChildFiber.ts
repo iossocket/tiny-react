@@ -325,7 +325,7 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
           existingChildren.delete(newFiber.key === null ? newIdx : newFiber.key);
         }
 
-        lastPlacedIndex = placeChild(returnFiber, lastPlacedIndex, newIdx);
+        lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
         if (previousNewFiber === null) {
           resultFirstChild = newFiber;
         } else {
