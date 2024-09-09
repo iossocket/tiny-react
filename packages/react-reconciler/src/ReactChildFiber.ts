@@ -176,6 +176,8 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
         return null;
       }
     }
+
+    return null;
   }
 
   function placeChild(
@@ -226,14 +228,16 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
     returnFiber: Fiber,
     newIdx: number,
     newChild: any
-  ) {
+  ): Fiber | null {
     if (isText(newChild)) {
       const matchedFiber = existingChildren.get(newIdx) || null;
       return updateTextNode(returnFiber, matchedFiber, newChild + "");
-    } else {
+    } else if (typeof newChild === 'object' && newChild !== null) {
       const matchedFiber = existingChildren.get(newChild.key === null ? newIdx : newChild.key) || null;
       return updateElement(returnFiber, matchedFiber, newChild);
     }
+
+    return null;
   }
 
   function reconcileChildrenArray(

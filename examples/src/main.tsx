@@ -50,6 +50,9 @@ const FunctionComponent_ModifyLastEle = () => {
     <ul>
       {arr.map(ele => <li key={ele}>{ele}</li>)}
     </ul>
+    {count1 % 2 === 0 ? <h1>null</h1> : null}
+    {count1 % 2 === 0 ? <h1>undefined</h1> : undefined}
+    {count1 % 2 === 0 && <h1>boolean</h1>}
   </div>
 }
 
