@@ -1,3 +1,4 @@
+import { isFn } from "shared/utils";
 import { scheduleUpdateOnFiber } from "./ReactFiberWorkLoop";
 import { Fiber, FiberRoot } from "./ReactInternalTypes";
 import { HostRoot } from "./ReactWorkTags";
@@ -36,7 +37,7 @@ function finishRenderingHooks() {
 type Dispatch<A> = (action: A) => void;
 
 export function useReducer<S, I, A>(
-  reducer: (state: S, action: A) => S,
+  reducer: (state: S, action: A) => S | null,
   initialArg: I,
   init?: (initialArg: I) => S
 ) {
@@ -98,7 +99,7 @@ function updateWorkInProgressHook(): Hook {
 function dispatchReducerAction<S, I, A>(
   fiber: Fiber,
   hook: Hook,
-  reducer: (state: S, action: A) => S,
+  reducer: (state: S, action: A) => S | null,
   action: any
 ) {
   hook.memorizedState = reducer ? reducer(hook.memorizedState, action) : action;
@@ -108,7 +109,7 @@ function dispatchReducerAction<S, I, A>(
   if (fiber.sibling) {
     fiber.sibling.alternate = fiber.sibling;
   }
-  scheduleUpdateOnFiber(root, fiber);
+  scheduleUpdateOnFiber(root, fiber, true);
 }
 
 function getRootForUpdatedFiber(sourceFiber: Fiber): FiberRoot {
@@ -121,4 +122,12 @@ function getRootForUpdatedFiber(sourceFiber: Fiber): FiberRoot {
   }
 
   return node.tag === HostRoot ? node.stateNode : null;
+}
+
+// difference between useState and useReducer:
+// useState won't trigger component update if state not change, while useReduce will
+// reduce provide a function for state update instead of override the previous state, with reducer, it can be reuse easier.
+export function useState<S>(initialState: (() => S) | S) {
+  const init = isFn(initialState) ? (initialState as any)() : initialState;
+  return useReducer(null, init);
 }

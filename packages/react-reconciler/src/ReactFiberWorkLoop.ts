@@ -17,11 +17,15 @@ let executionContext: ExecutionContext = NoContext;
 let workInProgress: Fiber | null = null;
 let workInProgressRoot: FiberRoot | null = null;
 
-export function scheduleUpdateOnFiber(root: FiberRoot, fiber: Fiber) {
+export function scheduleUpdateOnFiber(root: FiberRoot, fiber: Fiber, isSync?: boolean) {
   workInProgressRoot = root;
   workInProgress = fiber;
 
-  ensureRootIsScheduled(root); // schedule a task to run performConcurrentWorkOnRoot()
+  if (isSync) {
+    queueMicrotask(() => performConcurrentWorkOnRoot(root));
+  } else {
+    ensureRootIsScheduled(root); // schedule a task to run performConcurrentWorkOnRoot()
+  }
 };
 
 export function performConcurrentWorkOnRoot(root: FiberRoot) {
