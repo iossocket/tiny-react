@@ -131,3 +131,41 @@ export function useState<S>(initialState: (() => S) | S) {
   const init = isFn(initialState) ? (initialState as any)() : initialState;
   return useReducer(null, init);
 }
+
+export function useMemo<S>(
+  nextCreate: () => S,
+  deps: Array<any> | void | null
+): S {
+  const hook = updateWorkInProgressHook();
+  const nextDeps = deps === undefined ? null : deps;
+
+  const prevState = hook.memorizedState;
+  if (prevState !== null) {
+    if (nextDeps !== null) {
+      const prevDeps: Array<any> | null = prevState[1];
+      if (areHookInputsEqual(nextDeps as any, prevDeps)) {
+        return prevState[0];
+      }
+    }
+  }
+
+  const nextValue = nextCreate();
+  hook.memorizedState = [nextValue, nextDeps];
+  return nextValue;
+}
+
+export function areHookInputsEqual(
+  nextDeps: Array<any>,
+  prevDeps: Array<any> | null
+): boolean {
+  if (prevDeps === null) {
+    return false;
+  }
+  for (let i = 0; i < prevDeps.length && i < nextDeps.length; i++) {
+    if (Object.is(nextDeps[i], prevDeps[i])) {
+      continue;
+    }
+    return false;
+  }
+  return true;
+}

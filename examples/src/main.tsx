@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ReactDOM, Component, useReducer, useState } from "../which-react";
+import { ReactDOM, Component, useReducer, useState, useMemo } from "../which-react";
 import './index.css'
 
 const fragment: any = (
@@ -30,6 +30,15 @@ const FunctionComponent = ({ name }: { name: string }) => {
 const FunctionComponent_ModifyLastEle = () => {
   const [count1, setCount1] = useReducer((x: number) => x + 1, 1);
   const [count2, setCount2] = useState(1);
+  const expensive = useMemo(() => {
+    console.log("compute");
+    let sum = 0;
+    for (let i = 0; i < count1; i++) {
+      sum += i;
+    }
+    return sum;
+    // count
+  }, [count1]);
   const arr = count2 % 2 === 0 ? [0, 1, 2, 3, 4] : [0, 1, 2, 4]
   const _cls = count1 % 2 === 0 ? "red green_bg" : "green red_bg";
   return <div className="border">

@@ -3,5 +3,6 @@ export {
   Fragment,
   Component,
   useReducer,
-  useState
+  useState,
+  useMemo
 } from "../packages/react";
