@@ -169,3 +169,24 @@ export function areHookInputsEqual(
   }
   return true;
 }
+
+export function useCallback<S>(
+  callback: S,
+  deps: Array<any> | void | null
+): S {
+  const hook = updateWorkInProgressHook();
+  const nextDeps = deps === undefined ? null : deps;
+
+  const prevState = hook.memorizedState;
+  if (prevState !== null) {
+    if (nextDeps !== null) {
+      const prevDeps = prevState[1];
+      if (areHookInputsEqual(nextDeps as any, prevDeps)) {
+        return prevState[0];
+      }
+    }
+  }
+
+  hook.memorizedState = [callback, nextDeps];
+  return callback;
+}

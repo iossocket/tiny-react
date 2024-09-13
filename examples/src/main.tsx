@@ -43,6 +43,7 @@ const FunctionComponent_ModifyLastEle = () => {
   const _cls = count1 % 2 === 0 ? "red green_bg" : "green red_bg";
   return <div className="border">
     <h3 className={_cls}>FunctionComponent_ModifyLastEle</h3>
+    <p>{expensive}</p>
     <button
       onClick={() => {
         setCount1();

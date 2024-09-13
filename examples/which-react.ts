@@ -4,5 +4,6 @@ export {
   Component,
   useReducer,
   useState,
-  useMemo
+  useMemo,
+  useCallback
 } from "../packages/react";
