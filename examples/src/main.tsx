@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ReactDOM, Component, useReducer, useState, useMemo } from "../which-react";
+import { ReactDOM, Component, useReducer, useState, useMemo, useRef } from "../which-react";
 import './index.css'
 
 const fragment: any = (
@@ -30,6 +30,11 @@ const FunctionComponent = ({ name }: { name: string }) => {
 const FunctionComponent_ModifyLastEle = () => {
   const [count1, setCount1] = useReducer((x: number) => x + 1, 1);
   const [count2, setCount2] = useState(1);
+  const ref = useRef(0);
+  function handleClick() {
+    ref.current = ref.current + 1;
+    alert("You clicked " + ref.current + " times!");
+  }
   const expensive = useMemo(() => {
     console.log("compute");
     let sum = 0;
@@ -57,6 +62,7 @@ const FunctionComponent_ModifyLastEle = () => {
     }}>
       {count2}
     </button>
+    <button onClick={handleClick}>click</button>
     <ul>
       {arr.map(ele => <li key={ele}>{ele}</li>)}
     </ul>

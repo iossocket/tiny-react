@@ -190,3 +190,11 @@ export function useCallback<S>(
   hook.memorizedState = [callback, nextDeps];
   return callback;
 }
+
+export function useRef<S>(initialValue: S): { current: S } {
+  const hook = updateWorkInProgressHook();
+  if (currentHook === null) {
+    hook.memorizedState = { current: initialValue };
+  }
+  return hook.memorizedState;
+}

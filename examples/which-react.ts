@@ -5,5 +5,6 @@ export {
   useReducer,
   useState,
   useMemo,
-  useCallback
+  useCallback,
+  useRef
 } from "../packages/react";
