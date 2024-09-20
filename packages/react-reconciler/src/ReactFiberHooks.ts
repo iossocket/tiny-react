@@ -2,10 +2,19 @@ import { isFn } from "shared/utils";
 import { scheduleUpdateOnFiber } from "./ReactFiberWorkLoop";
 import { Fiber, FiberRoot } from "./ReactInternalTypes";
 import { HostRoot } from "./ReactWorkTags";
+import { HookFlags, HookLayout, HookPassive } from "./ReactHookEffectTags";
+import { Flags, Passive, Update } from "./ReactFiberFlags";
 
 type Hook = {
   memorizedState: any;
   next: null | Hook;
+}
+
+type Effect = {
+  tag: HookFlags;
+  create: () => (() => void) | void;
+  deps: Array<any> | void | null;
+  next: Effect | null;
 }
 
 let currentlyRenderingFiber: Fiber | null = null;
@@ -20,6 +29,7 @@ export function renderWithHooks<Props>(
 ): any {
   currentlyRenderingFiber = workInProgress;
   workInProgress.memoizedState = null;
+  workInProgress.updateQueue = null;
 
   let children = Component(props);
 
@@ -197,4 +207,64 @@ export function useRef<S>(initialValue: S): { current: S } {
     hook.memorizedState = { current: initialValue };
   }
   return hook.memorizedState;
+}
+
+// useLayoutEffect and useEffect have same structure
+// create & cleanup function are executed in different timing
+export function useLayoutEffect(
+  create: () => (() => void) | void,
+  deps: Array<any> | void | null
+) {
+  return updateEffectImpl(Update, HookLayout, create, deps);
+}
+
+export function useEffect(
+  create: () => (() => void) | void,
+  deps: Array<any> | void | null
+) {
+  return updateEffectImpl(Passive, HookPassive, create, deps);
+}
+
+function updateEffectImpl(
+  fiberFlags: Flags,
+  hookFlags: HookFlags,
+  create: () => (() => void) | void,
+  deps: Array<any> | void | null
+) {
+  const hook = updateWorkInProgressHook();
+  const nextDeps = deps === undefined ? null : deps;
+  // todo
+  currentlyRenderingFiber!.flags |= fiberFlags;
+  // 1. save effect; 2. construct effect linked list
+  hook.memorizedState = pushEffect(hookFlags, create, nextDeps);
+}
+
+function pushEffect(
+  hookFlags: HookFlags,
+  create: () => (() => void) | void,
+  deps: Array<any> | void | null
+) {
+  const effect: Effect = {
+    tag: hookFlags,
+    create,
+    deps,
+    next: null
+  }
+
+  let componentUpdateQueue = currentlyRenderingFiber.updateQueue;
+  if (componentUpdateQueue === null) {
+    componentUpdateQueue = {
+      lastEffect: null
+    };
+    currentlyRenderingFiber.updateQueue = componentUpdateQueue;
+    componentUpdateQueue.lastEffect = effect.next = effect;
+  } else {
+    const lastEffect = componentUpdateQueue.lastEffect;
+    const firstEffect = lastEffect.next;
+    lastEffect.next = effect;
+    effect.next = firstEffect;
+    componentUpdateQueue.lastEffect = effect;
+  }
+
+  return effect;
 }

@@ -34,6 +34,8 @@ export type Fiber = {
 
   // the fibers need to be deleted
   deletions: Array<Fiber> | null;
+
+  updateQueue: any;
 }
 
 export type Container = Element | Document | DocumentFragment;
