@@ -1,9 +1,11 @@
+import { NormalPriority } from "scheduler/src/SchedulerPriorities";
 import { createWorkInProgress } from "./ReactFiber";
 import { beginWork } from "./ReactFiberBeginWork";
-import { commitMutationEffects } from "./ReactFiberCommitWork";
+import { commitMutationEffects, flushPassiveEffects } from "./ReactFiberCommitWork";
 import { completeWork } from "./ReactFiberCompleteWork";
 import { ensureRootIsScheduled } from "./ReactFiberRootScheduler";
 import type { Fiber, FiberRoot } from "./ReactInternalTypes";
+import { Scheduler } from "scheduler";
 
 type ExecutionContext = number;
 export const NoContext = /*             */ 0b000;
@@ -56,10 +58,15 @@ function commitRoot(root: FiberRoot) {
   // !1. start to commit
   executionContext != CommitContext;
 
-  // !2. mutation phase, render DOM tree
+  // !2.1 mutation phase, render DOM tree
   // root.finishedWork is type of Fiber with tag HostRoot(3)
   const finishedWork = root.finishedWork as Fiber;
   commitMutationEffects(root, finishedWork);
+  // !2.2 passive effect phase
+  // Scheduler scheduleCallback(priorityLevel: PriorityLevel, callback: Callback)
+  Scheduler.scheduleCallback(NormalPriority, () => {
+    flushPassiveEffects(root.finishedWork);
+  });
 
   // !3. commit done
   executionContext = prevExecutionContext;

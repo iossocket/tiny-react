@@ -232,8 +232,15 @@ function updateEffectImpl(
   deps: Array<any> | void | null
 ) {
   const hook = updateWorkInProgressHook();
-  const nextDeps = deps === undefined ? null : deps;
-  // todo
+  const nextDeps = (deps === undefined) ? null : deps;
+  if (currentHook !== null) {
+    if (nextDeps !== null) {
+      const prevDeps = currentHook.memorizedState.deps;
+      if (areHookInputsEqual(nextDeps as any[], prevDeps)) {
+        return;
+      }
+    }
+  }
   currentlyRenderingFiber!.flags |= fiberFlags;
   // 1. save effect; 2. construct effect linked list
   hook.memorizedState = pushEffect(hookFlags, create, nextDeps);

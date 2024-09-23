@@ -1,7 +1,8 @@
 import { isHost } from "./ReactFiberCompleteWork";
-import { ChildDeletion, Placement } from "./ReactFiberFlags";
+import { ChildDeletion, Passive, Placement, Update } from "./ReactFiberFlags";
+import { HookFlags, HookLayout, HookPassive } from "./ReactHookEffectTags";
 import type { Fiber, FiberRoot } from "./ReactInternalTypes";
-import { HostComponent, HostRoot, HostText } from "./ReactWorkTags";
+import { FunctionComponent, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
 
 export function commitMutationEffects(root: FiberRoot, finishedWork: Fiber) {
   recursivelyTraverseMutationEffects(root, finishedWork);
@@ -34,6 +35,29 @@ function commitReconciliationEffects(finishedWork: Fiber) {
 
     finishedWork.flags &= ~ChildDeletion;
     finishedWork.deletions = null;
+  }
+
+  if (flags & Update) {
+    if (finishedWork.tag === FunctionComponent) {
+      commitHookEffectListMount(HookLayout, finishedWork);
+      finishedWork.flags &= ~Update;
+    }
+  }
+}
+
+function commitHookEffectListMount(hookFlags: HookFlags, finishedWork: Fiber) {
+  const updateQueue = finishedWork.updateQueue;
+  let lastEffect = updateQueue!.lastEffect;
+  if (lastEffect !== null) {
+    const firstEffect = lastEffect.next;
+    let effect = firstEffect;
+    do {
+      if ((effect.tag & hookFlags) === hookFlags) {
+        const create = effect.create;
+        create();
+      }
+      effect = effect.next;
+    } while (effect !== firstEffect);
   }
 }
 
@@ -128,4 +152,34 @@ function getHostParentFiber(fiber: Fiber): Fiber {
 
 function isHostParent(fiber: Fiber): boolean {
   return fiber.tag === HostComponent || fiber.tag === HostRoot;
+}
+
+export function flushPassiveEffects(finishedWork: Fiber) {
+  // !1. traverse all children
+  recursivelyTraversePassiveMountEffects(finishedWork);
+  // !2. execute passive effects if found
+  commitPassiveEffects(finishedWork);
+}
+
+function recursivelyTraversePassiveMountEffects(finishedWork: Fiber) {
+  let child = finishedWork.child;
+  while (child !== null) {
+    // !1. traverse all children
+    recursivelyTraversePassiveMountEffects(child);
+    // !2. execute passive effects if found
+    commitPassiveEffects(finishedWork);
+    child = child.sibling;
+  }
+}
+
+function commitPassiveEffects(finishedWork: Fiber) {
+  switch (finishedWork.tag) {
+    case FunctionComponent: {
+      if (finishedWork.flags & Passive) {
+        commitHookEffectListMount(HookPassive, finishedWork);
+        finishedWork.flags &= ~Passive;
+      }
+      break;
+    }
+  }
 }

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ReactDOM, Component, useReducer, useState, useMemo, useRef } from "../which-react";
+import { ReactDOM, Component, useReducer, useState, useMemo, useRef, useEffect, useLayoutEffect } from "../which-react";
 import './index.css'
 
 const fragment: any = (
@@ -10,21 +10,25 @@ const fragment: any = (
   </>
 );
 
-const FunctionComponent = ({ name }: { name: string }) => {
-  const [count, setCount] = useReducer((x: number) => x + 1, 0);
-  return <div className="border">
-    {/* <h4>{name}</h4> */}
-    {count % 2 === 0 ? <button onClick={() => {
-      console.log('%c [ onClick ]-17', 'font-size:13px; background:pink; color:#bf2c9f;',)
-      setCount();
-    }}>
-      {count}
-    </button> : <span onClick={() => {
-      console.log('%c [ onClick ]-17', 'font-size:13px; background:pink; color:#bf2c9f;',)
-      setCount();
-    }}>React</span>}
 
-  </div>
+function FunctionComponent() {
+  const [count1, setCount] = useReducer((x) => x + 1, 0);
+  const [count2, setCount2] = useState(0);
+  // layout effect
+  useLayoutEffect(() => {
+    console.log("useLayoutEffect"); //sy-log
+  }, [count1]);
+  // passive effect
+  useEffect(() => {
+    console.log("useEffect"); //sy-log
+  }, [count2]);
+  return (
+    <div className="border">
+      <h1>函数组件</h1>
+      <button onClick={() => setCount()}>{count1}</button>
+      <button onClick={() => setCount2(count2 + 1)}>{count2}</button>
+    </div>
+  );
 }
 
 const FunctionComponent_ModifyLastEle = () => {
@@ -44,6 +48,15 @@ const FunctionComponent_ModifyLastEle = () => {
     return sum;
     // count
   }, [count1]);
+
+  useLayoutEffect(() => {
+    console.log("useLayoutEffect");
+  }, [count1])
+
+  useEffect(() => {
+    console.log("useEffect");
+  }, [count2])
+
   const arr = count2 % 2 === 0 ? [0, 1, 2, 3, 4] : [0, 1, 2, 4]
   const _cls = count1 % 2 === 0 ? "red green_bg" : "green red_bg";
   return <div className="border">
@@ -93,13 +106,13 @@ const jsx: any = (
     <h2>React</h2>
     Pure Text
     {fragment}
-    <FunctionComponent name="FunctionComponent" />
+    <FunctionComponent />
     <ClassComponent />
   </div>
 );
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  (<FunctionComponent_ModifyLastEle />) as any
+  (<FunctionComponent />) as any
 );
 
 // ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render("Hello World");
