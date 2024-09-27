@@ -275,3 +275,7 @@ function pushEffect(
 
   return effect;
 }
+
+export function useContext(context: any) {
+  return context._currentValue;
+}

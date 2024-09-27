@@ -8,5 +8,7 @@ export {
   useCallback,
   useRef,
   useEffect,
-  useLayoutEffect
+  useLayoutEffect,
+  useContext,
+  createContext
 } from "../packages/react";

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ReactDOM, Component, useReducer, useState, useMemo, useRef, useEffect, useLayoutEffect } from "../which-react";
+import { ReactDOM, Component, useReducer, useState, useMemo, useRef, useEffect, useLayoutEffect, useContext, createContext } from "../which-react";
 import './index.css'
 
 const fragment: any = (
@@ -10,10 +10,11 @@ const fragment: any = (
   </>
 );
 
-
+const MyContext = createContext(100);
 function FunctionComponent() {
   const [count1, setCount] = useReducer((x) => x + 1, 0);
   const [count2, setCount2] = useState(0);
+  const contextValue = useContext(MyContext);
   // layout effect
   useLayoutEffect(() => {
     console.log("useLayoutEffect"); //sy-log
@@ -25,6 +26,7 @@ function FunctionComponent() {
   return (
     <div className="border">
       <h1>函数组件</h1>
+      <div>{contextValue}</div>
       <button onClick={() => setCount()}>{count1}</button>
       <button onClick={() => setCount2(count2 + 1)}>{count2}</button>
     </div>
