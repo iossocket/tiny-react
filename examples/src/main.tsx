@@ -10,11 +10,12 @@ const fragment: any = (
   </>
 );
 
-const MyContext = createContext(100);
+const CountContext = createContext(100);
+const ThemeContext = createContext('red');
 function FunctionComponent() {
   const [count1, setCount] = useReducer((x) => x + 1, 0);
   const [count2, setCount2] = useState(0);
-  const contextValue = useContext(MyContext);
+  const contextValue = useContext(CountContext);
   // layout effect
   useLayoutEffect(() => {
     console.log("useLayoutEffect"); //sy-log
@@ -29,8 +30,28 @@ function FunctionComponent() {
       <div>{contextValue}</div>
       <button onClick={() => setCount()}>{count1}</button>
       <button onClick={() => setCount2(count2 + 1)}>{count2}</button>
+      <ThemeContext.Provider value="green">
+        <CountContext.Provider value={count1}>
+          <CountContext.Provider value={count1 + 1}>
+            <Child />
+          </CountContext.Provider>
+          <Child />
+        </CountContext.Provider>
+      </ThemeContext.Provider>
     </div>
   );
+}
+
+function Child() {
+  const count = useContext(CountContext);
+  const theme = useContext(ThemeContext);
+  return (
+    <div className={"border " + theme}>
+      <h2>Child</h2>
+      <p>with useContext</p>
+      <p>{count}</p>
+    </div>
+  )
 }
 
 const FunctionComponent_ModifyLastEle = () => {

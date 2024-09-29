@@ -1,6 +1,7 @@
 import { isNum, isStr } from "shared/utils";
 import type { Fiber } from "./ReactInternalTypes";
-import { ClassComponent, Fragment, FunctionComponent, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
+import { ClassComponent, ContextProvider, Fragment, FunctionComponent, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
+import { popProvider } from "./ReactFiberNewContext";
 
 export function completeWork(current: Fiber | null, workInProgress: Fiber): Fiber | null {
   const newProps = workInProgress.pendingProps;
@@ -10,6 +11,10 @@ export function completeWork(current: Fiber | null, workInProgress: Fiber): Fibe
     case Fragment:
     case HostRoot:
       return null;
+    case ContextProvider: {
+      popProvider(workInProgress.type._context);
+      return null;
+    }
     case HostComponent: {
       const { type } = workInProgress;
       if (current !== null && workInProgress.stateNode !== null) {

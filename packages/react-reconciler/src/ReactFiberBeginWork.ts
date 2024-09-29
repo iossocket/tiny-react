@@ -1,8 +1,9 @@
 import { isNum, isStr } from "shared/utils";
 import type { Fiber } from "./ReactInternalTypes";
-import { ClassComponent, Fragment, FunctionComponent, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
+import { ClassComponent, ContextProvider, Fragment, FunctionComponent, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
 import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 import { renderWithHooks } from "./ReactFiberHooks";
+import { pushProvider } from "./ReactFiberNewContext";
 
 export function beginWork(current: Fiber | null, workInProgress: Fiber): Fiber | null {
   switch (workInProgress.tag) {
@@ -18,6 +19,8 @@ export function beginWork(current: Fiber | null, workInProgress: Fiber): Fiber |
       return updateClassComponent(current, workInProgress);
     case FunctionComponent:
       return updateFunctionComponent(current, workInProgress);
+    case ContextProvider:
+      return updateContextProvider(current, workInProgress);
   }
   throw new Error(
     `Unknown unit of work tag (${workInProgress.tag}). This error is likely caused by a bug in ` +
@@ -78,6 +81,15 @@ function updateFunctionComponent(current: Fiber | null, workInProgress: Fiber) {
   const children = renderWithHooks(current, workInProgress, type, pendingProps);
 
   reconcileChildren(current, workInProgress, children);
+  return workInProgress.child;
+}
+
+function updateContextProvider(current: Fiber | null, workInProgress: Fiber) {
+  const context = workInProgress.type._context;
+  const value = workInProgress.pendingProps.value;
+  // stack
+  pushProvider(context, value);
+  reconcileChildren(current, workInProgress, workInProgress.pendingProps.children);
   return workInProgress.child;
 }
 

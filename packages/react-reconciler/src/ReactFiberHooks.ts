@@ -4,6 +4,8 @@ import { Fiber, FiberRoot } from "./ReactInternalTypes";
 import { HostRoot } from "./ReactWorkTags";
 import { HookFlags, HookLayout, HookPassive } from "./ReactHookEffectTags";
 import { Flags, Passive, Update } from "./ReactFiberFlags";
+import { readContext } from "./ReactFiberNewContext";
+import { ReactContext } from "shared/ReactTypes";
 
 type Hook = {
   memorizedState: any;
@@ -276,6 +278,6 @@ function pushEffect(
   return effect;
 }
 
-export function useContext(context: any) {
-  return context._currentValue;
+export function useContext<T>(context: ReactContext<T>): T {
+  return readContext(context);
 }
