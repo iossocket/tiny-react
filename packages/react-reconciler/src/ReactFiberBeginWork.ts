@@ -69,7 +69,14 @@ function updateFragment(current: Fiber | null, workInProgress: Fiber) {
 
 function updateClassComponent(current: Fiber | null, workInProgress: Fiber) {
   const { type, pendingProps } = workInProgress;
-  const instance = new type(pendingProps);
+  const context = type.contextType;
+  const newValue = readContext(context);
+  let instance = workInProgress.stateNode;
+  if (current === null) {
+    instance = new type(pendingProps);
+    workInProgress.stateNode = instance;
+  }
+  instance.context = newValue;
   workInProgress.stateNode = instance;
 
   const children = instance.render();

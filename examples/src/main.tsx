@@ -62,10 +62,22 @@ function Child() {
             </div>
           )
         }
-
       </ThemeContext.Consumer>
+
+      <p>with contextType</p>
+      <ClassComponent />
     </div>
   )
+}
+
+class ClassComponent extends Component {
+  static contextType = CountContext;
+  render() {
+    return <div className="border">
+      <h1>ClassComponent</h1>
+      <p>{this.context as number}</p>
+    </div>
+  }
 }
 
 const FunctionComponent_ModifyLastEle = () => {
@@ -120,21 +132,6 @@ const FunctionComponent_ModifyLastEle = () => {
     {count1 % 2 === 0 ? <h1>undefined</h1> : undefined}
     {count1 % 2 === 0 && <h1>boolean</h1>}
   </div>
-}
-
-
-class ClassComponent extends (Component as any) {
-  constructor(props: any, context: any) {
-    super(props, context);
-  }
-
-  render() {
-    return (
-      <div>
-        <h3>ClassComponent</h3>
-      </div>
-    );
-  }
 }
 
 const jsx: any = (
