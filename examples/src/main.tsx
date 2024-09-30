@@ -50,6 +50,20 @@ function Child() {
       <h2>Child</h2>
       <p>with useContext</p>
       <p>{count}</p>
+
+      <p>with Consumer</p>
+      <ThemeContext.Consumer>
+        {
+          (theme) => (
+            <div className={theme}>
+              <CountContext.Consumer>
+                {(value) => <p>{count}</p>}
+              </CountContext.Consumer>
+            </div>
+          )
+        }
+
+      </ThemeContext.Consumer>
     </div>
   )
 }

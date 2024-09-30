@@ -1,14 +1,15 @@
 import { isNum, isStr } from "shared/utils";
 import type { Fiber } from "./ReactInternalTypes";
-import { ClassComponent, ContextProvider, Fragment, FunctionComponent, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
+import { ClassComponent, ContextConsumer, ContextProvider, Fragment, FunctionComponent, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
 import { popProvider } from "./ReactFiberNewContext";
 
 export function completeWork(current: Fiber | null, workInProgress: Fiber): Fiber | null {
   const newProps = workInProgress.pendingProps;
   switch (workInProgress.tag) {
-    case FunctionComponent:
-    case ClassComponent:
     case Fragment:
+    case ClassComponent:
+    case FunctionComponent:
+    case ContextConsumer:
     case HostRoot:
       return null;
     case ContextProvider: {

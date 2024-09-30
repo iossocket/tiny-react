@@ -78,6 +78,8 @@ export function createFiberFromTypeAndProps(
     fiberTag = Fragment;
   } else if (type.$$typeof === REACT_PROVIDER_TYPE) {
     fiberTag = ContextProvider;
+  } else if (type.$$typeof === REACT_CONTEXT_TYPE) {
+    fiberTag = ContextConsumer;
   }
 
   const fiber = createFiber(fiberTag, pendingProps, key);
