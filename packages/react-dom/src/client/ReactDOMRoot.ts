@@ -2,6 +2,7 @@ import type { ReactNodeList } from "shared/ReactTypes";
 import { createFiberRoot } from "react-reconciler/src/ReactFiberRoot";
 import type { FiberRoot, Container } from "react-reconciler/src/ReactInternalTypes";
 import { updateContainer } from "react-reconciler/src/ReactFiberReconciler";
+import { listenToAllSupportedEvents } from "react-dom-bindings/src/event/DOMPluginEventSystem";
 
 type RootType = {
   render: (children: ReactNodeList) => void,
@@ -18,6 +19,7 @@ ReactDOMRoot.prototype.render = function (children: ReactNodeList) {
 
 export function createRoot(container: Container): RootType {
   const root: FiberRoot = createFiberRoot(container);
+  listenToAllSupportedEvents(container);
   return new ReactDOMRoot(root); // root here is _internalRoot
 };
 

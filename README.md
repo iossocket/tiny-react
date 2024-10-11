@@ -1,5 +1,6 @@
 ## TINY-REACT
 
+0. `nvm use 20.10.0`
 1. `pnpm i`
 2. `pnpm run test`
 

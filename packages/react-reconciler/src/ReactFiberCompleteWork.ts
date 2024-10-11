@@ -63,7 +63,7 @@ function finalizeInitialChildren(domElement: Element, prevProps: any, nextProps:
       }
     } else {
       if (propKey === "onClick") {
-        domElement.removeEventListener("click", prevProp);
+        // domElement.removeEventListener("click", prevProp);
       } else {
         (domElement as any)[propKey] = "";
       }
@@ -78,7 +78,7 @@ function finalizeInitialChildren(domElement: Element, prevProps: any, nextProps:
       }
     } else {
       if (propKey === "onClick") {
-        domElement.addEventListener("click", nextProp);
+        // domElement.addEventListener("click", nextProp);
       } else {
         (domElement as any)[propKey] = nextProp;
       }
