@@ -145,8 +145,35 @@ const jsx: any = (
   </div>
 );
 
+function SimpleFunctionComponent() {
+  const [count, setCount] = useReducer((x: number) => x + 1, 0);
+  const [text, setText] = useState("");
+  return (
+    <div className="border">
+      <h1>函数组件</h1>
+      <button
+        onClick={(e) => {
+          console.log(e);
+          setCount();
+        }}
+        onDoubleClick={(e) => {
+          console.log(e);
+        }}
+      >{count}</button>
+
+      <input
+        value={text}
+        onChange={(e) => {
+          setText(e.target.value);
+        }}
+      />
+      <p>{text}</p>
+    </div>
+  );
+}
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  (<FunctionComponent />) as any
+  (<SimpleFunctionComponent />) as any
 );
 
 // ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render("Hello World");

@@ -84,7 +84,6 @@ function updateWorkInProgressHook(): Hook {
   let hook: Hook;
   const current = currentlyRenderingFiber.alternate;
   if (current) {
-    console.log('%c [ update hook ]-74', 'font-size:13px; background:pink; color:#bf2c9f;',)
     // update
     currentlyRenderingFiber.memoizedState = current.memoizedState;
     if (workInProgressHook) {
@@ -115,7 +114,6 @@ function dispatchReducerAction<S, I, A>(
   action: any
 ) {
   hook.memorizedState = reducer ? reducer(hook.memorizedState, action) : action;
-  console.log('%c [ hook.memorizedState ]-104', 'font-size:13px; background:pink; color:#bf2c9f;', hook.memorizedState);
   const root = getRootForUpdatedFiber(fiber);
   fiber.alternate = { ...fiber };
   if (fiber.sibling) {

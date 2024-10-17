@@ -44,3 +44,15 @@ const RetryLane1: Lane = /*                             */ 0b0000000010000000000
 const RetryLane2: Lane = /*                             */ 0b0000000100000000000000000000000;
 const RetryLane3: Lane = /*                             */ 0b0000001000000000000000000000000;
 const RetryLane4: Lane = /*                             */ 0b0000010000000000000000000000000;
+
+export const SomeRetryLane: Lane = RetryLane1;
+
+export const SelectiveHydrationLane: Lane = /*          */ 0b0000100000000000000000000000000;
+
+const NonIdleLanes: Lanes = /*                          */ 0b0000111111111111111111111111111;
+
+export const IdleHydrationLane: Lane = /*               */ 0b0001000000000000000000000000000;
+export const IdleLane: Lane = /*                        */ 0b0010000000000000000000000000000;
+
+export const OffscreenLane: Lane = /*                   */ 0b0100000000000000000000000000000;
+export const DeferredLane: Lane = /*                    */ 0b1000000000000000000000000000000;
