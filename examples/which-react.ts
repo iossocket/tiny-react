@@ -10,5 +10,6 @@ export {
   useEffect,
   useLayoutEffect,
   useContext,
-  createContext
+  createContext,
+  memo
 } from "../packages/react";

@@ -80,6 +80,8 @@ export function createFiberFromTypeAndProps(
     fiberTag = ContextProvider;
   } else if (type.$$typeof === REACT_CONTEXT_TYPE) {
     fiberTag = ContextConsumer;
+  } else if (type.$$typeof === REACT_MEMO_TYPE) {
+    fiberTag = MemoComponent;
   }
 
   const fiber = createFiber(fiberTag, pendingProps, key);
@@ -114,4 +116,12 @@ export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
 export function createFiberFromText(content: string): Fiber {
   const fiber = createFiber(HostText, content, null);
   return fiber;
+}
+
+export function isSimpleFunctionComponent(type: any): boolean {
+  return (
+    typeof type === "function" &&
+    !shouldConstruct(type) &&
+    type.defaultProps === undefined
+  );
 }

@@ -2,7 +2,7 @@ import { Fiber } from "react-reconciler/src/ReactInternalTypes";
 import type { DOMEventName } from "./DOMEventNames";
 import { addEventBubbleListener, addEventCaptureListener } from "./EventListener";
 import { allNativeEvents } from "./EventRegistry";
-import { EventSystemFlags, IS_CAPTURE_PHASE } from "./EventSystemFlags";
+import { EventSystemFlags, IS_CAPTURE_PHASE, SHOULD_NOT_PROCESS_POLYFILL_EVENT_PLUGINS } from "./EventSystemFlags";
 import * as SimpleEventPlugin from "./plugins/SimpleEventPlugin";
 import * as ChangeEventPlugin from "./plugins/ChangeEventPlugin";
 import { createEventListenerWrapperWithPriority } from "./ReactDOMEventListener";
@@ -47,15 +47,18 @@ export function extractEvents(
     eventSystemFlags,
     targetContainer,
   );
-  ChangeEventPlugin.extractEvents(
-    dispatchQueue,
-    domEventName,
-    targetInst,
-    nativeEvent,
-    nativeEventTarget,
-    eventSystemFlags,
-    targetContainer,
-  );
+
+  if ((eventSystemFlags & SHOULD_NOT_PROCESS_POLYFILL_EVENT_PLUGINS) === 0) {
+    ChangeEventPlugin.extractEvents(
+      dispatchQueue,
+      domEventName,
+      targetInst,
+      nativeEvent,
+      nativeEventTarget,
+      eventSystemFlags,
+      targetContainer,
+    );
+  }
 }
 
 export const mediaEventTypes: Array<DOMEventName> = [
@@ -98,8 +101,6 @@ export const nonDelegatedEvents: Set<DOMEventName> = new Set([
   // into this Set. Note: the "error" event isn't an exclusive media event,
   // and can occur on other elements too. Rather than duplicate that event,
   // we just take it from the media events array.
-  // 为了减少字节数，我们将上述媒体事件数组插入到这个 Set 中。
-  // 注意："error" 事件并不是一个独占的媒体事件，也可能发生在其他元素上。我们不会重复这个事件，而是直接从媒体事件数组中取出。
   ...mediaEventTypes,
 ]);
 
@@ -145,11 +146,16 @@ function addTrappedEventListener(
     eventSystemFlags
   )
 
+  let isPassiveListener: boolean = false;
+  if (domEventName === "touchstart" || domEventName === "touchmove" || domEventName === "wheel") {
+    isPassiveListener = true;
+  }
+
   // 2. binding events
   if (isCapturePhaseListener) {
-    addEventCaptureListener(targetContainer, domEventName, listener);
+    addEventCaptureListener(targetContainer, domEventName, listener, isPassiveListener);
   } else {
-    addEventBubbleListener(targetContainer, domEventName, listener);
+    addEventBubbleListener(targetContainer, domEventName, listener, isPassiveListener);
   }
 }
 

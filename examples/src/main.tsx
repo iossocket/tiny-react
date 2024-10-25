@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ReactDOM, Component, useReducer, useState, useMemo, useRef, useEffect, useLayoutEffect, useContext, createContext } from "../which-react";
+import { ReactDOM, Component, useReducer, useState, useMemo, useRef, useEffect, useLayoutEffect, useContext, createContext, memo } from "../which-react";
 import './index.css'
+import SomeList from "./SomeList";
 
 const fragment: any = (
   <>
@@ -145,6 +146,8 @@ const jsx: any = (
   </div>
 );
 
+
+
 function SimpleFunctionComponent() {
   const [count, setCount] = useReducer((x: number) => x + 1, 0);
   const [text, setText] = useState("");
@@ -168,6 +171,7 @@ function SimpleFunctionComponent() {
         }}
       />
       <p>{text}</p>
+      <SomeList text={text} />
     </div>
   );
 }

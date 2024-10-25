@@ -1,9 +1,11 @@
 import { isNum, isStr } from "shared/utils";
 import type { Fiber } from "./ReactInternalTypes";
-import { ClassComponent, ContextConsumer, ContextProvider, Fragment, FunctionComponent, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
+import { ClassComponent, ContextConsumer, ContextProvider, Fragment, FunctionComponent, HostComponent, HostRoot, HostText, MemoComponent, SimpleMemoComponent } from "./ReactWorkTags";
 import { mountChildFibers, reconcileChildFibers } from "./ReactChildFiber";
 import { renderWithHooks } from "./ReactFiberHooks";
 import { pushProvider, readContext } from "./ReactFiberNewContext";
+import { createFiberFromTypeAndProps, createWorkInProgress, isSimpleFunctionComponent } from "./ReactFiber";
+import shallowEqual from "shared/shallowEqual";
 
 export function beginWork(current: Fiber | null, workInProgress: Fiber): Fiber | null {
   switch (workInProgress.tag) {
@@ -23,6 +25,10 @@ export function beginWork(current: Fiber | null, workInProgress: Fiber): Fiber |
       return updateContextProvider(current, workInProgress);
     case ContextConsumer:
       return updateContextConsumer(current, workInProgress);
+    case MemoComponent:
+      return updateMemoComponent(current, workInProgress);
+    case SimpleMemoComponent:
+      return updateSimpleMemoComponent(current, workInProgress);
   }
   throw new Error(
     `Unknown unit of work tag (${workInProgress.tag}). This error is likely caused by a bug in ` +
@@ -110,6 +116,45 @@ function updateContextConsumer(current: Fiber | null, workInProgress: Fiber) {
   const newChildren = render(newValue);
   reconcileChildren(current, workInProgress, newChildren);
   return workInProgress.child;
+}
+
+function updateMemoComponent(current: Fiber | null, workInProgress: Fiber) {
+  const Component = workInProgress.type;
+  const type = Component.type;
+  if (current === null) {
+    if (isSimpleFunctionComponent(type) && Component.compare === null && Component.defaultProps === undefined) {
+      workInProgress.type = type;
+      workInProgress.tag = SimpleMemoComponent;
+      return updateSimpleMemoComponent(current, workInProgress);
+    }
+    const child = createFiberFromTypeAndProps(type, null, workInProgress.pendingProps);
+    child.return = workInProgress;
+    workInProgress.child = child;
+    return child;
+  }
+
+  let compare = Component.compare;
+  compare = compare !== null ? compare : shallowEqual;
+  if (compare(current.memoizedProps, workInProgress.pendingProps)) {
+    return bailoutOnAlreadyFinishedWork();
+  }
+  const newChild = createWorkInProgress(current.child, workInProgress.pendingProps);
+  newChild.return = workInProgress;
+  workInProgress.child = newChild;
+  return newChild;
+}
+
+function updateSimpleMemoComponent(current: Fiber | null, workInProgress: Fiber) {
+  if (current !== null) {
+    if (shallowEqual(current.memoizedProps, workInProgress.pendingProps)) {
+      return bailoutOnAlreadyFinishedWork();
+    }
+  }
+  return updateFunctionComponent(current, workInProgress);
+}
+
+function bailoutOnAlreadyFinishedWork() {
+  return null;
 }
 
 function reconcileChildren(
