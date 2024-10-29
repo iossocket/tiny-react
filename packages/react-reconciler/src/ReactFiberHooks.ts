@@ -1,11 +1,12 @@
 import { isFn } from "shared/utils";
-import { scheduleUpdateOnFiber } from "./ReactFiberWorkLoop";
+import { requestDeferredLane, scheduleUpdateOnFiber } from "./ReactFiberWorkLoop";
 import { Fiber, FiberRoot } from "./ReactInternalTypes";
 import { HostRoot } from "./ReactWorkTags";
 import { HookFlags, HookLayout, HookPassive } from "./ReactHookEffectTags";
 import { Flags, Passive, Update } from "./ReactFiberFlags";
 import { readContext } from "./ReactFiberNewContext";
 import { ReactContext } from "shared/ReactTypes";
+import { includesOnlyNonUrgentLanes, Lanes, mergeLanes, NoLanes } from "./ReactFiberLane";
 
 type Hook = {
   memorizedState: any;
@@ -19,6 +20,7 @@ type Effect = {
   next: Effect | null;
 }
 
+let renderLanes: Lanes = NoLanes;
 let currentlyRenderingFiber: Fiber | null = null;
 let workInProgressHook: Hook | null = null;
 let currentHook: Hook | null = null;
@@ -27,8 +29,11 @@ export function renderWithHooks<Props>(
   current: Fiber | null,
   workInProgress: Fiber,
   Component: any,
-  props: Props
+  props: Props,
+  nextRenderLanes: Lanes
 ): any {
+  renderLanes = nextRenderLanes;
+
   currentlyRenderingFiber = workInProgress;
   workInProgress.memoizedState = null;
   workInProgress.updateQueue = null;
@@ -278,4 +283,35 @@ function pushEffect(
 
 export function useContext<T>(context: ReactContext<T>): T {
   return readContext(context);
+}
+
+export function useDeferredValue<T>(value: T): T {
+  const hook = updateWorkInProgressHook();
+
+  const prevValue: T = hook.memorizedState;
+
+  if (currentHook !== null) {
+    if (Object.is(value, prevValue)) {
+      return value;
+    } else {
+      const shouldDeferValue = !includesOnlyNonUrgentLanes(renderLanes);
+      if (shouldDeferValue) {
+        const deferredLane = requestDeferredLane();
+        currentlyRenderingFiber!.lanes = mergeLanes(
+          currentlyRenderingFiber!.lanes,
+          deferredLane
+        );
+
+        // markSkippedUpdateLanes(deferredLane);
+        return prevValue;
+      } else {
+        hook.memorizedState = value;
+
+        return value;
+      }
+    }
+  }
+  hook.memorizedState = value;
+
+  return value;
 }

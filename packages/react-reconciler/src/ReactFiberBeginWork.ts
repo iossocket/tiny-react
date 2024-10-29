@@ -6,6 +6,7 @@ import { renderWithHooks } from "./ReactFiberHooks";
 import { pushProvider, readContext } from "./ReactFiberNewContext";
 import { createFiberFromTypeAndProps, createWorkInProgress, isSimpleFunctionComponent } from "./ReactFiber";
 import shallowEqual from "shared/shallowEqual";
+import { NoLanes } from "./ReactFiberLane";
 
 export function beginWork(current: Fiber | null, workInProgress: Fiber): Fiber | null {
   switch (workInProgress.tag) {
@@ -93,7 +94,7 @@ function updateClassComponent(current: Fiber | null, workInProgress: Fiber) {
 
 function updateFunctionComponent(current: Fiber | null, workInProgress: Fiber) {
   const { type, pendingProps } = workInProgress;
-  const children = renderWithHooks(current, workInProgress, type, pendingProps);
+  const children = renderWithHooks(current, workInProgress, type, pendingProps, NoLanes);
 
   reconcileChildren(current, workInProgress, children);
   return workInProgress.child;

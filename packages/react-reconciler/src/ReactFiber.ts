@@ -9,6 +9,7 @@ import {
   REACT_PROVIDER_TYPE,
 } from "shared/ReactSymbols";
 import { isFn, isStr } from "shared/utils";
+import { NoLanes } from "./ReactFiberLane";
 
 export function createFiber(
   tag: WorkTag,
@@ -42,6 +43,10 @@ function FiberNode(tag: WorkTag, pendingProps: any, key: null | string) {
   this.alternate = null;
 
   this.deletions = null;
+  this.updateQueue = null;
+
+  this.lanes = NoLanes;
+  this.childLanes = NoLanes;
 }
 
 export function createFiberFromElement(element: ReactElement) {
@@ -105,6 +110,8 @@ export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
     workInProgress.flags = NoFlags;
   }
   workInProgress.flags = current.flags;
+  workInProgress.childLanes = current.childLanes;
+  workInProgress.lanes = current.lanes;
   workInProgress.child = current.child;
   workInProgress.memoizedProps = current.memoizedProps;
   workInProgress.memoizedState = current.memoizedState;

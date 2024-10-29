@@ -1,3 +1,5 @@
+import { FiberRoot } from "./ReactInternalTypes";
+
 export type Lanes = number;
 export type Lane = number;
 export type LaneMap<T> = Array<T>;
@@ -56,3 +58,122 @@ export const IdleLane: Lane = /*                        */ 0b0010000000000000000
 
 export const OffscreenLane: Lane = /*                   */ 0b0100000000000000000000000000000;
 export const DeferredLane: Lane = /*                    */ 0b1000000000000000000000000000000;
+
+export const UpdateLanes: Lanes = SyncLane | InputContinuousLane | DefaultLane | TransitionLanes;
+let nextTransitionLane: Lane = TransitionLane1;
+
+export function claimNextTransitionLane(): Lane {
+  const lane = nextTransitionLane;
+  nextTransitionLane <<= 1;
+  if ((nextTransitionLane & TransitionLanes) === NoLanes) {
+    nextTransitionLane = TransitionLane1;
+  }
+  return lane;
+}
+
+export function includesNonIdleWork(lanes: Lanes): boolean {
+  return (lanes & NonIdleLanes) !== NoLanes;
+}
+
+export function getHighestPriorityLane(lanes: Lanes): Lane {
+  return lanes & -lanes;
+}
+
+function getHighestPriorityLanes(lanes: Lanes | Lane): Lanes {
+  const pendingSyncLanes = lanes & SyncUpdateLanes;
+  if (pendingSyncLanes !== 0) {
+    // https://github.com/facebook/react/pull/25524
+    return pendingSyncLanes;
+  }
+  switch (getHighestPriorityLane(lanes)) {
+    case SyncHydrationLane:
+      return SyncHydrationLane;
+    case SyncLane:
+      return SyncLane;
+    case InputContinuousHydrationLane:
+      return InputContinuousHydrationLane;
+    case InputContinuousLane:
+      return InputContinuousLane;
+    case DefaultHydrationLane:
+      return DefaultHydrationLane;
+    case DefaultLane:
+      return DefaultLane;
+    case TransitionHydrationLane:
+      return TransitionHydrationLane;
+    case TransitionLane1:
+    case TransitionLane2:
+    case TransitionLane3:
+    case TransitionLane4:
+    case TransitionLane5:
+    case TransitionLane6:
+    case TransitionLane7:
+    case TransitionLane8:
+    case TransitionLane9:
+    case TransitionLane10:
+    case TransitionLane11:
+    case TransitionLane12:
+    case TransitionLane13:
+    case TransitionLane14:
+    case TransitionLane15:
+      return lanes & TransitionLanes;
+    case RetryLane1:
+    case RetryLane2:
+    case RetryLane3:
+    case RetryLane4:
+      return lanes & RetryLanes;
+    case SelectiveHydrationLane:
+      return SelectiveHydrationLane;
+    case IdleHydrationLane:
+      return IdleHydrationLane;
+    case IdleLane:
+      return IdleLane;
+    case OffscreenLane:
+      return OffscreenLane;
+    case DeferredLane:
+      // This shouldn't be reachable because deferred work is always entangled
+      // with something else.
+      return NoLanes;
+    default:
+      // This shouldn't be reachable, but as a fallback, return the entire bitmask.
+      return lanes;
+  }
+}
+
+export function getNextLanes(root: FiberRoot, wipLanes: Lanes): Lanes {
+  const pendingLanes = root.pendingLanes;
+  if (pendingLanes === NoLanes) {
+    return NoLanes;
+  }
+
+  let nextLanes = getHighestPriorityLanes(pendingLanes);
+
+  if (nextLanes === NoLanes) {
+    return NoLanes;
+  }
+  if (wipLanes !== NoLanes && wipLanes !== nextLanes) {
+    const nextLane = getHighestPriorityLane(nextLanes);
+    const wipLane = getHighestPriorityLane(wipLanes);
+    if (
+      nextLane >= wipLane ||
+      (nextLane === DefaultLane && (wipLane & TransitionLanes) !== NoLanes)
+    ) {
+      return wipLanes;
+    }
+  }
+
+  return nextLanes;
+}
+
+export function includesOnlyNonUrgentLanes(lanes: Lanes): boolean {
+  // TODO: Should hydration lanes be included here? This function is only
+  // used in `updateDeferredValueImpl`.
+  const UrgentLanes = SyncLane | InputContinuousLane | DefaultLane;
+  return (lanes & UrgentLanes) === NoLanes;
+}
+export function includesOnlyTransitions(lanes: Lanes): boolean {
+  return (lanes & TransitionLanes) === lanes;
+}
+
+export function mergeLanes(a: Lanes | Lane, b: Lanes | Lane): Lanes {
+  return a | b;
+}

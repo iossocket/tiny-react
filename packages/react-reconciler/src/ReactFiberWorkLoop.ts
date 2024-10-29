@@ -6,6 +6,9 @@ import { completeWork } from "./ReactFiberCompleteWork";
 import { ensureRootIsScheduled } from "./ReactFiberRootScheduler";
 import type { Fiber, FiberRoot } from "./ReactInternalTypes";
 import { Scheduler } from "scheduler";
+import { claimNextTransitionLane, Lane, NoLane } from "./ReactFiberLane";
+import { getCurrentUpdatePriority } from "./ReactEventPriorities";
+import { getCurrentEventPriority } from "react-dom-bindings/src/client/ReactFiberConfigDOM";
 
 type ExecutionContext = number;
 export const NoContext = /*             */ 0b000;
@@ -18,6 +21,7 @@ let executionContext: ExecutionContext = NoContext;
 
 let workInProgress: Fiber | null = null;
 let workInProgressRoot: FiberRoot | null = null;
+let workInProgressDeferredLane: Lane = NoLane;
 
 export function scheduleUpdateOnFiber(root: FiberRoot, fiber: Fiber, isSync?: boolean) {
   workInProgressRoot = root;
@@ -129,4 +133,21 @@ function completeUnitOfWork(unitOfWork: Fiber) {
     completedWork = returnFiber as Fiber;
     workInProgress = completedWork;
   } while (completedWork !== null);
+}
+
+export function requestUpdateLane(): Lane {
+  const updateLane: Lane = getCurrentUpdatePriority();
+  if (updateLane !== NoLane) {
+    return updateLane;
+  }
+  const eventLane: Lane = getCurrentEventPriority();
+  return eventLane;
+}
+
+export function requestDeferredLane(): Lane {
+  if (workInProgressDeferredLane === NoLane) {
+    workInProgressDeferredLane = claimNextTransitionLane();
+  }
+
+  return workInProgressDeferredLane;
 }

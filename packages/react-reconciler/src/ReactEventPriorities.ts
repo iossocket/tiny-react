@@ -1,6 +1,8 @@
 import {
   DefaultLane,
+  getHighestPriorityLane,
   IdleLane,
+  includesNonIdleWork,
   InputContinuousLane,
   Lane,
   Lanes,
@@ -24,3 +26,22 @@ export function getCurrentUpdatePriority(): EventPriority {
 export function setCurrentUpdatePriority(newPriority: EventPriority) {
   currentUpdatePriority = newPriority;
 }
+
+export function isHigherEventPriority(a: EventPriority, b: EventPriority): boolean {
+  return a !== 0 && a < b;
+}
+
+export function lanesToEventPriority(lanes: Lanes): EventPriority {
+  const lane = getHighestPriorityLane(lanes);
+  if (!isHigherEventPriority(DiscreteEventPriority, lane)) {
+    return DiscreteEventPriority;
+  }
+  if (!isHigherEventPriority(ContinuousEventPriority, lane)) {
+    return ContinuousEventPriority;
+  }
+  if (includesNonIdleWork(lane)) {
+    return DefaultEventPriority;
+  }
+  return IdleEventPriority;
+}
+

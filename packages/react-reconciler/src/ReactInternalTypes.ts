@@ -1,4 +1,5 @@
 import { Flags } from "./ReactFiberFlags";
+import { Lanes } from "./ReactFiberLane";
 import { WorkTag } from "./ReactWorkTags";
 
 export type Fiber = {
@@ -36,6 +37,9 @@ export type Fiber = {
   deletions: Array<Fiber> | null;
 
   updateQueue: any;
+
+  lanes: Lanes;
+  childLanes: Lanes;
 }
 
 export type Container = Element | Document | DocumentFragment;
@@ -44,4 +48,5 @@ export type FiberRoot = {
   containerInfo: Container;
   current: Fiber;
   finishedWork: Fiber | null;
+  pendingLanes: Lanes;
 };
